@@ -1,0 +1,14 @@
+{{ define "articles/article.html" }}
+<a href="/articles/show/{{ .ArticleID }}" style="outline: none; text-decoration: none;
+    color: inherit">
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="card">
+            <h5 class="card-header">Title - {{ .Title }}</h5>
+            <h5 class="card-header">Author - {{ .Author }}</h5>
+            <div class="card-body">
+                <p class="card-text">{{ .Content }}</p>
+            </div>
+        </div>
+    </li>
+</a>
+{{ end }}
