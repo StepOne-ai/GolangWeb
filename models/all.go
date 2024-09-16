@@ -17,6 +17,7 @@ type Article struct {
 type Candidate struct {
 	CandidateID int
 	Name string
+	Group string
 	UpVotes int
 	DownVotes int
 }
@@ -24,5 +25,5 @@ type Candidate struct {
 type Group struct {
 	GroupID int
 	Name string
-	Users []User
+	Candidates []Candidate
 }

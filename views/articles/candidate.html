@@ -1,0 +1,8 @@
+{{ define "articles/candidate.html" }}
+<li class="list-group-item d-flex align-items-center justify-content-between">
+    <p>{{ .CandidateID }}. {{ .Name }} {{ .Group }}</p><p>{{ .UpVotes }}✅ {{ .DownVotes }}❌</p>
+    <a href="/vote/win/{{ .CandidateID }}" class="btn btn-success" style="width: 100px;">Win</a>
+    <a href="/vote/lose/{{ .CandidateID }}" class="btn btn-danger" style="width: 100px;">Lose</a>
+    <a href="/vote/clear/{{ .CandidateID }}" class="btn btn-primary" style="width: 100px;">Clear</a>
+</li>
+{{ end }}

@@ -29,6 +29,14 @@ func main() {
     if err != nil {
         log.Fatalf("Failed to create table: %v", err)
     }
+    err = database.CreateTableCandidates(db)
+    if err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
+    err = database.CreateTableVotes(db)
+    if err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
 
     fmt.Println("Tables created successfully")
 
@@ -66,9 +74,33 @@ func main() {
 
     //Handle betting system
     r.GET("/betting", betting.BettingIndex)
+    r.POST("/betting/new", betting.BettingPost)
+
+    r.GET("/vote/win/:id", betting.VoteWin)
 
     //Handle user logout
     r.GET("/logout", u.Logout)
+
+    // Set Admin access
+    r.GET("/saa", func(c *gin.Context) {
+        username, err := c.Cookie("username")
+        if err != nil {
+            c.Redirect(302, "/")
+        }
+        if username == "admin" {
+            c.SetCookie("adminAccess", "true", 3600, "/", "localhost", false, true)
+            c.Redirect(302, "/betting")
+        } else {
+            c.Redirect(302, "/")
+        }
+    })
+
+    // Remove Admin access
+    r.GET("/raa", func(c *gin.Context) {
+        c.SetCookie("adminAccess", "false", -1, "/", "localhost", false, true)
+        c.Redirect(302, "/betting")
+    })
+
 
 	log.Println("Server started at localhost:8080")
 	r.Run(":3000")

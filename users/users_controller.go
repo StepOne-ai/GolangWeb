@@ -55,6 +55,17 @@ func LoginPost(c *gin.Context) {
 			false,
 			true,
 		)
+		if data.Username == "admin" {
+			c.SetCookie(
+				"adminAccess",
+				"true",
+				3600,
+				"/",
+				"localhost",
+				false,
+				true,
+			)
+		}
 		c.Redirect(
 			302,
 			"/articles",
