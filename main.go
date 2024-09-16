@@ -9,6 +9,7 @@ import (
     "dbgolang/database"
     "github.com/gin-gonic/gin"
     u "dbgolang/users"
+    "dbgolang/betting"
 )
 
 func main() {
@@ -59,11 +60,15 @@ func main() {
     // Handle Article show
     r.GET("/articles/show/:id", controllers.ArticleShow)
 
-    // Handle cookies
-    r.GET("/get-cookies", func (c *gin.Context) {
-        username, _ := c.Cookie("username")
-        c.JSON(200, gin.H{"username": username})
-    })
+    //Handle user account
+    r.GET("/account/:username", u.Account)
+    r.POST("/account/update/new", u.AccountUpdate)
+
+    //Handle betting system
+    r.GET("/betting", betting.BettingIndex)
+
+    //Handle user logout
+    r.GET("/logout", u.Logout)
 
 	log.Println("Server started at localhost:8080")
 	r.Run(":3000")

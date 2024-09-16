@@ -92,6 +92,7 @@ func RegisterPost(c *gin.Context) {
 	c.Bind(&data)
 
 	if data.Username == "" || data.Email == "" || data.Password == "" {
+		fmt.Println("Error")
 		c.Redirect(
 			302,
 			"/register",
@@ -122,10 +123,108 @@ func RegisterPost(c *gin.Context) {
 			"/articles",
 		)
 	} else {
-		// Set error
+		fmt.Println("last Error")
 		c.Redirect(
 			302,
 			"/register",
 		)
 	}
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie("username", "", -1, "/", "localhost", false, true)
+	c.Redirect(
+		302,
+		"/",
+	)
+}
+
+func Account(c *gin.Context) {
+	username := c.Param("username")
+
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+		if err != nil {
+		log.Fatal(err)
+	}
+		defer db.Close()
+
+	user, err := database.GetUserByUsername(db, username)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	current_user, err := c.Cookie("username")
+
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"articles/account.html",
+		gin.H{
+			"username": user.Username,
+			"email": user.Email,
+			"id": user.UserID,
+			"current_user": current_user,
+		},
+	)
+}
+
+func AccountUpdate(c *gin.Context) {
+	var data FormDataReg
+	c.Bind(&data)
+	//fmt.Println(data.Username, data.Email, data.Password)
+	current_user, err := c.Cookie("username")
+
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+
+	if data.Username == "" || data.Email == "" || data.Password == "" {
+		fmt.Println("Error")
+		c.Redirect(
+			302,
+			"/account/"+current_user,
+		)
+		return
+	}
+
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	user, err := database.GetUserByUsername(db, current_user)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = database.UpdateUser(db, user.UserID, data.Username, data.Email, data.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c.HTML(
+		http.StatusOK,
+		"articles/account.html",
+		gin.H{
+			"username": data.Username,
+			"email": data.Email,
+			"id": user.UserID,
+			"current_user": data.Username,
+		},
+	)
 }

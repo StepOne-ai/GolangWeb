@@ -143,7 +143,7 @@ func InsertUser(db *sql.DB, username, email string, password string) bool {
 		return false
 	}
     _, err = stmt.Exec(username, email, hashed)
-    return err != nil
+    return err == nil
 }
 
 func InsertArticle(db *sql.DB, title, content, author string) error {
@@ -220,4 +220,88 @@ func UpdateArticle(db *sql.DB, articleID int, title, content string) error {
     }
     fmt.Println("Article updated successfully!")
     return nil
+}
+
+func GetUserByUsername(db *sql.DB, username string) (m.User, error) {
+    stmt, err := db.Prepare(`SELECT UserID, Username, Email, Password FROM Users WHERE Username = ?`)
+    if err != nil {
+        return m.User{}, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var user m.User
+    err = stmt.QueryRow(username).Scan(&user.UserID, &user.Username, &user.Email, &user.PasswordHash)
+    if err != nil {
+        return m.User{}, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return user, nil
+}
+
+func UpdateUser(db *sql.DB, userID int, username string, email string, password string) error {
+    stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ?, Password = ? WHERE UserID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+    defer stmt.Close()
+    hashed, err := HashPassword(password)
+    
+    if err != nil {
+        return fmt.Errorf("failed to hash password: %w", err)
+    }
+
+    _, err = stmt.Exec(username, email, hashed, userID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+    fmt.Println("User updated successfully!")
+    return nil
+}
+
+type Candidate struct {
+    BetID int
+    Name string
+    UpVotes int
+    DownVotes int
+}
+
+func CreateNewTableForGroup(db *sql.DB, name string) error {
+    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS ` + name + ` (
+        BetID INTEGER PRIMARY KEY AUTOINCREMENT,
+        Name TEXT NOT NULL,
+        UpVotes INTEGER NOT NULL,
+        DownVotes INTEGER NOT NULL,
+        CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare create table statement: %w", err)
+    }
+    _, err = stmt.Exec()
+    if err != nil {
+        return fmt.Errorf("failed to execute create table statement: %w", err)
+    }
+    return nil
+}
+
+func GetAllGroups(db *sql.DB) ([]m.Candidate, error) {
+    rows, err := db.Query("SELECT CandidateID, Name, UpVotes, DownVotes FROM Candidates")
+    if err != nil {
+        return nil, fmt.Errorf("failed to query users: %w", err)
+    }
+    defer rows.Close()
+
+    var users []m.User
+    for rows.Next() {
+        var u m.User
+        if err := rows.Scan(&u.UserID, &u.Username, &u.PasswordHash); err != nil {
+            return nil, fmt.Errorf("failed to scan row: %w", err)
+        }
+        users = append(users, u)
+    }
+
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("error iterating over rows: %w", err)
+    }
+
+    return users, nil
 }

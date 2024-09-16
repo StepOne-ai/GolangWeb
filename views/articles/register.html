@@ -59,8 +59,8 @@ button[type="submit"]:hover {
 </style>
 <body>
     <form class="login-form"
-        hx-post="/register/new" 
-        hx-swap="afterbegin">
+        action="/register/new" 
+        method="POST">
         <h2>Register</h2>
         <div class="input-group">
           <input type="text" id="email" name="email" placeholder="myemail@gmail.com" required>

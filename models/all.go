@@ -4,6 +4,7 @@ type User struct {
 	UserID int
 	Username string
 	PasswordHash string
+	Email string
 }
 
 type Article struct {
@@ -11,4 +12,17 @@ type Article struct {
 	Title string
 	Content string
 	Author string
+}
+
+type Candidate struct {
+	CandidateID int
+	Name string
+	UpVotes int
+	DownVotes int
+}
+
+type Group struct {
+	GroupID int
+	Name string
+	Users []User
 }

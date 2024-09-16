@@ -1,4 +1,4 @@
-{{ define "articles/article_show.html" }}
+{{ define "articles/betting.html" }}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,52 +37,6 @@
             </div>
         </div>
     </header>
-    <div class="container">
-        <form
-        hx-post="/articles/update/new">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" 
-                class="form-control" 
-                id="title" 
-                aria-describedby="titleHelp" 
-                name="title"
-                value="{{ .Title }}"
-                {{ if ne .Author .username }}disabled{{ end }}>
-                <div id="titleHelp" class="form-text">Title of the note</div>
-            </div>
-            <div class="mb-3">
-                <label for="content" class="form-label">Content</label>
-                <textarea class="form-control" 
-                id="content" 
-                rows="5" 
-                name="content" 
-                {{ if ne .Author .username }}disabled{{ end }}
-                >{{ .Content }}</textarea> 
-            </div>
-            <div class="mb-3">
-                <label for="ID" class="form-label">ID</label>
-                <input type="text" 
-                class="form-control" 
-                id="ID" 
-                aria-describedby="IDHelp" 
-                name="ID"
-                value="{{ .ArticleID }}"
-                readonly>
-            </div>
-            {{ if eq .Author .username }}
-            <div class="col-12">
-                <button class="btn btn-primary" type="submit">
-                    <span class="spinner-border spinner-border-sm htmx-indicator" role="status" 
-                        aria-hidden="true"
-                        id="spinner">
-                    </span>
-                    Update
-                </button>
-                <a href="/articles/delete/{{ .ArticleID }}" class="btn btn-danger">Delete</a>
-            </div>
-            {{ end }}
-        </form>
-    </div>
+    
 </body>
 {{ end }}

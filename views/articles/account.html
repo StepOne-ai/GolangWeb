@@ -1,0 +1,106 @@
+{{ define "articles/account.html" }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Bootstrap core CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+  <!-- Custom fonts for this template -->
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+                <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+                </a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li><a href="/logout" class="nav-link px-2 link-secondary">Logout</a></li>
+                    <li><a href="/articles" class="nav-link px-2 link-primary">Articles</a></li>
+                    <li><a href="/betting" class="nav-link px-2 link-primary">Betting</a></li>
+                </ul>
+                <a href="/account/{{ .username }}" class="text-dark text-decoration-none" style="margin-right: 10px;">{{ .username }}<img src="https://github.com/mdo.png" alt="mdo" width="52" height="52" class="rounded-circle" style="margin-left: 10px;"></a>
+            </div>
+        </div>
+    </header>
+    <div class="container mt-4">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-6 vh-100">
+                    <h1>Account Settings</h1>
+                    <p>
+                        <form class="row g-3" 
+                            action="/account/update/new" 
+                            method="POST">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" 
+                                class="form-control" 
+                                id="username" 
+                                aria-describedby="usernameHelp" 
+                                name="username" 
+                                value="{{ .username }}"
+                                {{ if ne .current_user .username }}disabled{{ end }}>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="text" 
+                                class="form-control" 
+                                id="email" 
+                                aria-describedby="emailHelp" 
+                                name="email" 
+                                value="{{ .email }}"
+                                {{ if ne .current_user .username }}disabled{{ end }}>
+                            </div>
+                            {{ if eq .current_user .username }}
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="text" 
+                                class="form-control" 
+                                id="password" 
+                                aria-describedby="passwordHelp" 
+                                name="password">
+                            </div>
+                            {{ end }}
+                            <div class="mb-3">
+                                <label for="id" class="form-label">ID</label>
+                                <input type="text" 
+                                class="form-control" 
+                                id="id" 
+                                aria-describedby="idHelp" 
+                                name="id" 
+                                value="{{ .id }}"
+                                readonly>
+                            </div>
+                            {{ if eq .current_user .username }}
+                            <div class="col-12">
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="spinner-border spinner-border-sm htmx-indicator" role="status" 
+                                        aria-hidden="true"
+                                        id="spinner">
+                                    </span>
+                                    Submit
+                                </button>
+                            </div>
+                            {{ end }}
+                        </form>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+{{ end }}

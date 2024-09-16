@@ -186,7 +186,7 @@ func ArticleShow(c *gin.Context) {
 	//Get username
 	username, err := c.Cookie("username")
 	if err != nil {
-		c.Redirect(302, "/")
+		c.Redirect(500, "/")
 		return
 	}
     // Close database
