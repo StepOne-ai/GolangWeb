@@ -141,12 +141,19 @@ func ArticleUpdate(c *gin.Context) {
 }
 
 type FormDataWithID struct {
-	ID      int    `form:"ID"`
-	Title   string `form:"title"`
-	Content string `form:"content"`
+	ID      int    `form:"ID" binding:"required"`
+	Title   string `form:"title" binding:"required"`
+	Content string `form:"content" binding:"required"`
 }
 
 func ArticleUpdatePost(c *gin.Context) {
+	if c.Request.Method != "POST" {
+		c.Redirect(302, "/")
+	}
+	_, err := c.Cookie("username") 
+	if err != nil {
+		c.Redirect(302, "/")
+	}
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {

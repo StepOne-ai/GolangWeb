@@ -56,6 +56,29 @@ func GetArticles(db *sql.DB) ([]m.Article, error) {
     return articles, nil
 }
 
+func GetArticlesByAuthor(db *sql.DB, author string) ([]m.Article, error) {
+    rows, err := db.Query("SELECT ArticleID, Title, Author, Content FROM Articles WHERE Author = ?", author)
+    if err != nil {
+        return nil, fmt.Errorf("failed to query articles: %w", err)
+    }
+    defer rows.Close()
+
+    var articles []m.Article
+    for rows.Next() {
+        var u m.Article
+        if err := rows.Scan(&u.ArticleID, &u.Title, &u.Author, &u.Content); err != nil {
+            return nil, fmt.Errorf("failed to scan row: %w", err)
+        }
+        articles = append(articles, u)
+    }
+    if err := rows.Err();
+    err != nil {
+        return nil, fmt.Errorf("error iterating over rows: %w", err)
+    }
+
+    return articles, nil
+}
+
 func CheckPassword(users []m.User, username, password string) bool {
     for _, user := range users {
         if user.Username == username && VerifyPassword(password, user.PasswordHash) {
@@ -222,6 +245,22 @@ func UpdateArticle(db *sql.DB, articleID int, title, content string) error {
     return nil
 }
 
+func UpdateArticleAuthor(db *sql.DB, articleID int, author string) error {
+    stmt, err := db.Prepare(`UPDATE Articles SET Author = ? WHERE ArticleID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+
+    defer stmt.Close()
+
+    _, err = stmt.Exec(author, articleID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+
+    return nil
+}
+
 func GetUserByUsername(db *sql.DB, username string) (m.User, error) {
     stmt, err := db.Prepare(`SELECT UserID, Username, Email, Password FROM Users WHERE Username = ?`)
     if err != nil {
@@ -251,6 +290,21 @@ func UpdateUser(db *sql.DB, userID int, username string, email string, password 
     }
 
     _, err = stmt.Exec(username, email, hashed, userID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+    fmt.Println("User updated successfully!")
+    return nil
+}
+
+func UpdateUserWithoutPassword(db *sql.DB, userID int, username string, email string) error {
+    stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ? WHERE UserID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(username, email, userID)
     if err != nil {
         return fmt.Errorf("failed to execute update statement: %w", err)
     }
@@ -445,8 +499,6 @@ func DecrementDownVotes(db *sql.DB, candidateID int) error {
 
     return nil
 }
-
-// !! pizdec
 
 func CreateTableVotes(db *sql.DB) error {
     stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Votes (

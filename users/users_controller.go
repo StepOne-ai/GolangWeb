@@ -35,7 +35,6 @@ func LoginPost(c *gin.Context) {
 			302,
 			"/login",
 		)
-		return
 	}
 
 	dbPath := "./db.db"
@@ -93,9 +92,9 @@ func Register(c *gin.Context) {
 }
 
 type FormDataReg struct {
-	Username string `form:"username" binding:"required"`
-	Email string `form:"email" binding:"required"`
-	Password string `form:"password" binding:"required"`
+	Username string `form:"username"`
+	Email string `form:"email"`
+	Password string `form:"password"`
 }
 
 func RegisterPost(c *gin.Context) {
@@ -108,7 +107,6 @@ func RegisterPost(c *gin.Context) {
 			302,
 			"/register",
 		)
-		return
 	}
 
 	dbPath := "./db.db"
@@ -163,17 +161,15 @@ func Account(c *gin.Context) {
 	user, err := database.GetUserByUsername(db, username)
 
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err != nil {
-		log.Fatal(err)
+		c.Redirect(302, "/articles")
+		return
 	}
 
 	current_user, err := c.Cookie("username")
 
 	if err != nil {
 		c.Redirect(302, "/")
+		return
 	}
 
 	c.HTML(
@@ -196,9 +192,10 @@ func AccountUpdate(c *gin.Context) {
 
 	if err != nil {
 		c.Redirect(302, "/")
+		return
 	}
 
-	if data.Username == "" || data.Email == "" || data.Password == "" {
+	if data.Username == "" || data.Email == "" {
 		fmt.Println("Error")
 		c.Redirect(
 			302,
@@ -212,21 +209,58 @@ func AccountUpdate(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	user, err := database.GetUserByUsername(db, current_user)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = database.UpdateUser(db, user.UserID, data.Username, data.Email, data.Password)
-	if err != nil {
-		log.Fatal(err)
+	if data.Password != "" {
+		err = database.UpdateUser(db, user.UserID, data.Username, data.Email, data.Password)
+		c.SetCookie(
+			"username",
+			data.Username,
+			3600,
+			"/",
+			"localhost",
+			false,
+			true,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		err = database.UpdateUserWithoutPassword(db, user.UserID, data.Username, data.Email)
+		c.SetCookie(
+			"username",
+			data.Username,
+			3600,
+			"/",
+			"localhost",
+			false,
+			true,
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	if err != nil {
-		log.Fatal(err)
+	// Updating possible articles written by user
+	if data.Username != current_user {
+		articles, err := database.GetArticlesByAuthor(db, current_user)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, article := range articles {
+			err = database.UpdateArticleAuthor(db, article.ArticleID, data.Username)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
+
+	defer db.Close()
 
 	c.HTML(
 		http.StatusOK,
