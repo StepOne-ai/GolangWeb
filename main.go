@@ -77,23 +77,25 @@ func main() {
     r.POST("/betting/new", betting.BettingPost)
 
     r.GET("/vote/win/:id", betting.VoteWin)
+    r.GET("/vote/lose/:id", betting.VoteLose)
+    r.GET("/vote/clear/:id", betting.VoteClear)
 
     //Handle user logout
     r.GET("/logout", u.Logout)
 
-    // Set Admin access
-    r.GET("/saa", func(c *gin.Context) {
-        username, err := c.Cookie("username")
-        if err != nil {
-            c.Redirect(302, "/")
-        }
-        if username == "admin" {
-            c.SetCookie("adminAccess", "true", 3600, "/", "localhost", false, true)
-            c.Redirect(302, "/betting")
-        } else {
-            c.Redirect(302, "/")
-        }
-    })
+    // // Set Admin access
+    // r.GET("/saa", func(c *gin.Context) {
+    //     username, err := c.Cookie("username")
+    //     if err != nil {
+    //         c.Redirect(302, "/")
+    //     }
+    //     if username == "admin" {
+    //         c.SetCookie("adminAccess", "true", 3600, "/", "localhost", false, true)
+    //         c.Redirect(302, "/betting")
+    //     } else {
+    //         c.Redirect(302, "/")
+    //     }
+    // })
 
     // Remove Admin access
     r.GET("/raa", func(c *gin.Context) {

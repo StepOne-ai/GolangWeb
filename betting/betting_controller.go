@@ -3,6 +3,7 @@ package betting
 import (
 	"database/sql"
 	"dbgolang/database"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -88,8 +89,16 @@ func BettingPost(c *gin.Context) {
 
 func VoteWin(c *gin.Context) {
 	// Get the candidate id from the url
-	candidateID := c.Param("candidateID")
+	candidateID := c.Param("id")
+	fmt.Println("id: ", candidateID)
 	id, _ := strconv.Atoi(candidateID)
+	fmt.Println("id: ", id)
+
+	// Get user
+	username, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(302, "/")
+	}
 
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
@@ -98,11 +107,98 @@ func VoteWin(c *gin.Context) {
 	}
 
 	defer db.Close()
+	// Get vote if exists
+	user_id, err := database.GetUserIdByUsername(db, username)
 
-	err = database.IncrementUpVotes(db, id)
-	// Handle error
 	if err != nil {
 		c.Redirect(302, "/betting")
+	}
+
+	vote, err := database.GetVoteByUserAndCandidate(db, user_id, id)
+	if err != nil {
+		c.Redirect(302, "/betting")
+	}
+
+	if vote.VoteID == 0 && vote.UserID == 0 && vote.CandidateID == 0 && vote.VoteType == "" {
+		database.RegisterVote(db, user_id, id, "win")
+	}
+
+	c.Redirect(302, "/betting")
+}
+
+func VoteLose(c *gin.Context) {
+	// Get the candidate id from the url
+	candidateID := c.Param("id")
+	fmt.Println("id: ", candidateID)
+	id, _ := strconv.Atoi(candidateID)
+	fmt.Println("id: ", id)
+
+	// Get user
+	username, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+	// Get vote if exists
+	user_id, err := database.GetUserIdByUsername(db, username)
+
+	if err != nil {
+		c.Redirect(302, "/betting")
+	}
+
+	vote, err := database.GetVoteByUserAndCandidate(db, user_id, id)
+	if err != nil {
+		c.Redirect(302, "/betting")
+	}
+
+	if vote.VoteID == 0 && vote.UserID == 0 && vote.CandidateID == 0 && vote.VoteType == "" {
+		database.RegisterVote(db, user_id, id, "lose")
+	}
+
+	c.Redirect(302, "/betting")
+}
+
+func VoteClear(c *gin.Context) {
+	// Get the candidate id from the url
+	candidateID := c.Param("id")
+	fmt.Println("id: ", candidateID)
+	id, _ := strconv.Atoi(candidateID)
+	fmt.Println("id: ", id)
+
+	// Get user
+	username, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+	// Get vote if exists
+	user_id, err := database.GetUserIdByUsername(db, username)
+
+	if err != nil {
+		c.Redirect(302, "/betting")
+	}
+
+	vote, err := database.GetVoteByUserAndCandidate(db, user_id, id)
+	if err != nil {
+		c.Redirect(302, "/betting")
+	}
+
+	if vote.VoteID != 0 {
+		database.ClearVote(db, vote.VoteID)
 	}
 
 	c.Redirect(302, "/betting")

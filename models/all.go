@@ -27,3 +27,10 @@ type Group struct {
 	Name string
 	Candidates []Candidate
 }
+
+type Vote struct {
+	VoteID int
+	UserID int
+	CandidateID int
+	VoteType string
+}

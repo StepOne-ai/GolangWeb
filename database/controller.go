@@ -258,6 +258,22 @@ func UpdateUser(db *sql.DB, userID int, username string, email string, password 
     return nil
 }
 
+func GetUserIdByUsername(db *sql.DB, username string) (int, error) {
+    stmt, err := db.Prepare(`SELECT UserID FROM Users WHERE Username = ?`)
+    if err != nil {
+        return 0, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var userID int
+    err = stmt.QueryRow(username).Scan(&userID)
+    if err != nil {
+        return 0, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return userID, nil
+}
+
 func CreateTableCandidates(db *sql.DB) error {
     stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Candidates (
         CandidateID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -385,8 +401,38 @@ func IncrementUpVotes(db *sql.DB, candidateID int) error {
     return nil
 }
 
+func DecrementUpVotes(db *sql.DB, candidateID int) error {
+    stmt, err := db.Prepare(`UPDATE Candidates SET UpVotes = UpVotes - 1 WHERE CandidateID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(candidateID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+
+    return nil
+}
+
 func IncrementDownVotes(db *sql.DB, candidateID int) error {
     stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes + 1 WHERE CandidateID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(candidateID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+
+    return nil
+}
+
+func DecrementDownVotes(db *sql.DB, candidateID int) error {
+    stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes - 1 WHERE CandidateID = ?`)
     if err != nil {
         return fmt.Errorf("failed to prepare update statement: %w", err)
     }
@@ -434,5 +480,72 @@ func RegisterVote(db *sql.DB, userID int, candidateID int, voteType string) erro
         return fmt.Errorf("failed to execute insert statement: %w", err)
     }
 
+    if voteType == "win" {
+        IncrementUpVotes(db, candidateID)
+    } else if voteType == "lose" {
+        IncrementDownVotes(db, candidateID)
+    }
+
     return nil
-}   
+}
+
+func GetVoteByUserAndCandidate(db *sql.DB, userID int, candidateID int) (m.Vote, error) {
+    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType FROM Votes WHERE UserID = ? AND CandidateID = ?`)
+    if err != nil {
+        return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var vote m.Vote
+    err = stmt.QueryRow(userID, candidateID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType)
+    if err != nil {
+        return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return vote, nil
+}
+
+func GetVoteById(db *sql.DB, voteID int) (m.Vote, error) {
+    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType FROM Votes WHERE VoteID = ?`)
+    if err != nil {
+        return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var vote m.Vote
+    err = stmt.QueryRow(voteID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType)
+    if err != nil {
+        return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return vote, nil
+}
+
+func ClearVote(db *sql.DB, voteID int) error {
+    // Decrement the upvote count for the candidate associated with the vote
+    vote, err := GetVoteById(db, voteID)
+    if err != nil {
+        return fmt.Errorf("failed to get vote: %w", err)
+    }
+    
+    if vote.VoteType == "win" {
+        DecrementUpVotes(db, vote.CandidateID)
+    } else if vote.VoteType == "lose" {
+        DecrementDownVotes(db, vote.CandidateID)
+    }
+
+    // Delete the vote from the database
+    fmt.Println("Deleting vote with ID:", voteID)
+    stmt, err := db.Prepare(`DELETE FROM Votes WHERE VoteID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare delete statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(voteID)
+    if err != nil {
+        return fmt.Errorf("failed to execute delete statement: %w", err)
+    }
+
+    return nil
+}
