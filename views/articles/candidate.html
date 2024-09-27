@@ -1,8 +1,49 @@
 {{ define "articles/candidate.html" }}
 <li class="list-group-item d-flex align-items-center justify-content-between">
     <p>{{ .CandidateID }}. {{ .Name }} {{ .Group }}</p><p>{{ .UpVotes }}✅ {{ .DownVotes }}❌</p>
-    <a href="/vote/win/{{ .CandidateID }}" class="btn btn-success" style="width: 100px;">Win</a>
-    <a href="/vote/lose/{{ .CandidateID }}" class="btn btn-danger" style="width: 100px;">Lose</a>
+    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{ .CandidateID }}" class="btn btn-success" style="width: 100px;">Win</button>
+    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal2{{ .CandidateID }}" class="btn btn-danger" style="width: 100px;">Lose</button>    
     <a href="/vote/clear/{{ .CandidateID }}" class="btn btn-primary" style="width: 100px;">Clear</a>
+    <div class="modal" id="exampleModal{{ .CandidateID }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="form-control"
+                    action="vote/win/{{ .CandidateID }}" method="POST">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" 
+                        class="form-control" 
+                        id="amount"
+                        name="amount"
+                        aria-describedby="amountHelp" 
+                        placeholder="Enter Amount"
+                        required>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="exampleModal2{{ .CandidateID }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form class="form-control"
+                action="vote/lose/{{ .CandidateID }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Lose</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount ($)">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </li>
 {{ end }}

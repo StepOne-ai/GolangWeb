@@ -161,6 +161,12 @@ func ArticleUpdatePost(c *gin.Context) {
 	}
 	var data FormDataWithID
 	c.Bind(&data)
+	if data.Title == "" || data.Content == "" {
+		c.HTML(400, "articles/error.html", gin.H{
+			"error": "Title and content are required",
+		})
+		return
+	}
 	fmt.Println("Title: ", data.Title)
 	fmt.Println("Content: ", data.Content)
 	fmt.Println("ID: ", data.ID)

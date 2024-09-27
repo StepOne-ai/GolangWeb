@@ -22,15 +22,16 @@ type Candidate struct {
 	DownVotes int
 }
 
-type Group struct {
-	GroupID int
-	Name string
-	Candidates []Candidate
-}
-
 type Vote struct {
 	VoteID int
 	UserID int
 	CandidateID int
 	VoteType string
+	Amount int
+}
+
+type Wallet struct {
+	WalletID int
+	UserID int
+	Balance float64
 }

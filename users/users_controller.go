@@ -35,6 +35,7 @@ func LoginPost(c *gin.Context) {
 			302,
 			"/login",
 		)
+		return
 	}
 
 	dbPath := "./db.db"
@@ -54,6 +55,7 @@ func LoginPost(c *gin.Context) {
 			false,
 			true,
 		)
+		fmt.Println("Login successful: ", data.Username)
 		if data.Username == "admin" {
 			c.SetCookie(
 				"adminAccess",
@@ -69,7 +71,7 @@ func LoginPost(c *gin.Context) {
 			302,
 			"/articles",
 		)
-		
+		return
 		
 	} else {
 		// Set error
@@ -131,12 +133,14 @@ func RegisterPost(c *gin.Context) {
 			302,
 			"/articles",
 		)
+		return
 	} else {
 		fmt.Println("last Error")
 		c.Redirect(
 			302,
 			"/register",
 		)
+		return
 	}
 }
 
@@ -172,6 +176,12 @@ func Account(c *gin.Context) {
 		return
 	}
 
+	balance, err := database.GetBalanceByUserID(db, user.UserID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"articles/account.html",
@@ -179,13 +189,21 @@ func Account(c *gin.Context) {
 			"username": user.Username,
 			"email": user.Email,
 			"id": user.UserID,
+			"balance": balance,
 			"current_user": current_user,
 		},
 	)
 }
 
+type FormDataAccount struct {
+	Username string `form:"username"`
+	Email string `form:"email"`
+	Password string `form:"password"`
+	TopUp int `form:"balance"`
+}
+
 func AccountUpdate(c *gin.Context) {
-	var data FormDataReg
+	var data FormDataAccount
 	c.Bind(&data)
 	//fmt.Println(data.Username, data.Email, data.Password)
 	current_user, err := c.Cookie("username")
@@ -244,6 +262,19 @@ func AccountUpdate(c *gin.Context) {
 			log.Fatal(err)
 		}
 	}
+	// Updating balance
+	if data.TopUp != 0 {
+		err = database.UpdateBalance(db, user.UserID, data.TopUp)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	balance, err := database.GetBalanceByUserID(db, user.UserID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Updating possible articles written by user
 	if data.Username != current_user {
@@ -269,6 +300,7 @@ func AccountUpdate(c *gin.Context) {
 			"username": data.Username,
 			"email": data.Email,
 			"id": user.UserID,
+			"balance": balance,
 			"current_user": data.Username,
 		},
 	)

@@ -67,6 +67,16 @@
                                 value="{{ .email }}"
                                 {{ if ne .current_user .username }}disabled{{ end }}>
                             </div>
+                            <div class="mb-3">
+                                <label for="balance" class="form-label">${{ .balance }}</label>
+                                <input type="text" 
+                                class="form-control" 
+                                id="balance" 
+                                aria-describedby="emailHelp" 
+                                name="balance" 
+                                placeholder="0.00$"
+                                {{ if ne .current_user .username }}disabled{{ end }}>
+                            </div>
                             {{ if eq .current_user .username }}
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>

@@ -166,7 +166,48 @@ func InsertUser(db *sql.DB, username, email string, password string) bool {
 		return false
 	}
     _, err = stmt.Exec(username, email, hashed)
+
+    if err != nil {
+        return false
+    }
+
+    userID, err := GetUserIdByUsername(db, username)
+    if err != nil {
+        return false
+    }
+
+    err = CreateWallet(db, userID)
     return err == nil
+}
+
+func GetBalanceByUserID(db *sql.DB, userID int) (int, error) {
+    stmt, err := db.Prepare(`SELECT Balance FROM Wallets WHERE UserID = ?`)
+    if err != nil {
+        return 0, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var balance int
+    err = stmt.QueryRow(userID).Scan(&balance)
+    if err != nil {
+        return 0, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+    return balance, nil
+}
+
+func UpdateBalance(db *sql.DB, userID int, balance int) error {
+    stmt, err := db.Prepare(`UPDATE Wallets SET Balance = Balance + ? WHERE UserID = ?`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare update statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(balance, userID)
+    if err != nil {
+        return fmt.Errorf("failed to execute update statement: %w", err)
+    }
+
+    return nil
 }
 
 func InsertArticle(db *sql.DB, title, content, author string) error {
@@ -506,6 +547,7 @@ func CreateTableVotes(db *sql.DB) error {
         UserID INTEGER NOT NULL,
         CandidateID INTEGER NOT NULL,
         VoteType TEXT NOT NULL,
+        Amount INTEGER NOT NULL,
         VoteTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (UserID) REFERENCES Users(UserID),
         FOREIGN KEY (CandidateID) REFERENCES Candidates(CandidateID)
@@ -520,14 +562,46 @@ func CreateTableVotes(db *sql.DB) error {
     return nil
 }
 
-func RegisterVote(db *sql.DB, userID int, candidateID int, voteType string) error {
-    stmt, err := db.Prepare(`INSERT INTO Votes (UserID, CandidateID, VoteType) VALUES (?, ?, ?)`)
+func CreateTableWallets(db *sql.DB) error {
+    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Wallets (
+        WalletID INTEGER PRIMARY KEY AUTOINCREMENT,
+        UserID INTEGER NOT NULL,
+        Balance INTEGER DEFAULT 0,
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    )`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare create table statement: %w", err)
+    }
+    _, err = stmt.Exec()
+    if err != nil {
+        return fmt.Errorf("failed to execute create table statement: %w", err)
+    }
+    return nil
+}
+
+func CreateWallet(db *sql.DB, userID int) error {
+    stmt, err := db.Prepare(`INSERT INTO Wallets (UserID) VALUES (?)`)
     if err != nil {
         return fmt.Errorf("failed to prepare insert statement: %w", err)
     }
     defer stmt.Close()
 
-    _, err = stmt.Exec(userID, candidateID, voteType)
+    _, err = stmt.Exec(userID)
+    if err != nil {
+        return fmt.Errorf("failed to execute insert statement: %w", err)
+    }
+
+    return nil
+}
+
+func RegisterVote(db *sql.DB, userID int, candidateID int, voteType string, amount int) error {
+    stmt, err := db.Prepare(`INSERT INTO Votes (UserID, CandidateID, VoteType, Amount) VALUES (?, ?, ?, ?)`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare insert statement: %w", err)
+    }
+    defer stmt.Close()
+
+    _, err = stmt.Exec(userID, candidateID, voteType, amount)
     if err != nil {
         return fmt.Errorf("failed to execute insert statement: %w", err)
     }
@@ -542,15 +616,17 @@ func RegisterVote(db *sql.DB, userID int, candidateID int, voteType string) erro
 }
 
 func GetVoteByUserAndCandidate(db *sql.DB, userID int, candidateID int) (m.Vote, error) {
-    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType FROM Votes WHERE UserID = ? AND CandidateID = ?`)
+    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType, Amount FROM Votes WHERE UserID = ? AND CandidateID = ?`)
     if err != nil {
+        fmt.Println(err)
         return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
     }
     defer stmt.Close()
 
     var vote m.Vote
-    err = stmt.QueryRow(userID, candidateID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType)
+    err = stmt.QueryRow(userID, candidateID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType, &vote.Amount)
     if err != nil {
+        fmt.Println(err)
         return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
     }
 

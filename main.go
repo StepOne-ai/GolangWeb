@@ -1,15 +1,18 @@
 package main
 
 import (
-    "database/sql"
-    "fmt"
-    "log"
-    "dbgolang/controllers"
-    _ "github.com/mattn/go-sqlite3"
-    "dbgolang/database"
-    "github.com/gin-gonic/gin"
-    u "dbgolang/users"
-    "dbgolang/betting"
+	"database/sql"
+	"dbgolang/betting"
+	"dbgolang/controllers"
+	"dbgolang/database"
+	u "dbgolang/users"
+	"fmt"
+	"log"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -19,6 +22,8 @@ func main() {
         log.Fatalf("Failed to open database: %v", err)
     }
     defer db.Close()
+
+    var count int64 = 86400
 
     // Create tables
     err = database.CreateTableUsers(db)
@@ -34,6 +39,10 @@ func main() {
         log.Fatalf("Failed to create table: %v", err)
     }
     err = database.CreateTableVotes(db)
+    if err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
+    err = database.CreateTableWallets(db)
     if err != nil {
         log.Fatalf("Failed to create table: %v", err)
     }
@@ -76,8 +85,8 @@ func main() {
     r.GET("/betting", betting.BettingIndex)
     r.POST("/betting/new", betting.BettingPost)
 
-    r.GET("/vote/win/:id", betting.VoteWin)
-    r.GET("/vote/lose/:id", betting.VoteLose)
+    r.POST("/vote/win/:id", betting.VoteWin)
+    r.POST("/vote/lose/:id", betting.VoteLose)
     r.GET("/vote/clear/:id", betting.VoteClear)
 
     //Handle user logout
@@ -103,19 +112,32 @@ func main() {
         c.Redirect(302, "/betting")
     })
 
+    var time2 int64 = 1727611263
+    r.GET("/timer", func(ctx *gin.Context) {
+        currentTime := time.Now()
+        seconds := currentTime.Unix()
+        time := time2 + count - seconds
+        day := strconv.Itoa(int(time/(60*60*24)))
+        hours := strconv.Itoa(int(time/(60*60)%24))
+        minutes := strconv.Itoa(int(time/(60)%60))
+        secs := strconv.Itoa(int(time%60))
+        ctx.HTML(200, "articles/timer.html", gin.H{
+            "time": day + "d " + hours + "h " + minutes + "m " + secs + "s",
+        })
+    })
 
-	log.Println("Server started at localhost:8080")
+    r.GET("/results", func(ctx *gin.Context) {
+        if time2 - count + time.Now().Unix() == 0 {
+            // 1. Simulate results 50/50 for each candidate
+            // 2. Remove all candidates
+            // 3. Pay out to users based on coefficients
+            return
+        } else {
+            ctx.Redirect(302, "/")
+            return
+        }
+    })
+
+	log.Println("Server started at localhost:3000")
 	r.Run(":3000")
-    // Insert user
-    //username := "john_doe"
-    // email := "john@example.com"
-	// password := "password123"
-
-    // err = insertUser(db, username, email, password)
-    // if err != nil {
-    //     log.Fatalf("Failed to insert user: %v", err)
-    // }
-
-    // fmt.Println("User inserted successfully")
-
 }

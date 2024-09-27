@@ -43,8 +43,8 @@ func BettingIndex(c *gin.Context) {
 }
 
 type FormData struct {
-	Name string `form:"name" binding:"required"`
-	Group string `form:"group" binding:"required"`
+	Name string `form:"name"`
+	Group string `form:"group"`
 }
 
 func BettingPost(c *gin.Context) {
@@ -54,12 +54,13 @@ func BettingPost(c *gin.Context) {
 
 	if data.Name == "" || data.Group == "" {
 		c.Redirect(302, "/betting")
+		return
 	}
 
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	defer db.Close()
@@ -68,6 +69,7 @@ func BettingPost(c *gin.Context) {
 	// Handle error
 	if err != nil {
 		c.Redirect(302, "/betting")
+		return
 	}
 
 	candidate, err := database.GetCandidateByName(db, data.Name)
@@ -75,6 +77,7 @@ func BettingPost(c *gin.Context) {
 	// Handle error
 	if err != nil {
 		c.Redirect(302, "/betting")
+		return
 	}
 	
 	c.HTML(http.StatusOK, "articles/candidate.html", gin.H{
@@ -83,23 +86,22 @@ func BettingPost(c *gin.Context) {
 		"Group": candidate.Group,
 		"UpVotes": candidate.UpVotes,
 		"DownVotes": candidate.DownVotes,
-		"username": c.MustGet("username").(string),
 	})
 }
 
+type Amount struct {
+	Amount int `form:"amount"`
+}
+
 func VoteWin(c *gin.Context) {
-	// Get the candidate id from the url
-	candidateID := c.Param("id")
-	fmt.Println("id: ", candidateID)
-	id, _ := strconv.Atoi(candidateID)
-	fmt.Println("id: ", id)
-
-	// Get user
-	username, err := c.Cookie("username")
-	if err != nil {
+	var data Amount
+	if err := c.Bind(&data); err != nil {
 		c.Redirect(302, "/")
+		return
 	}
-
+	value := data.Amount
+	fmt.Println("value: ", value)
+	
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -107,29 +109,60 @@ func VoteWin(c *gin.Context) {
 	}
 
 	defer db.Close()
-	// Get vote if exists
+	// Check if enough
+	username, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(302, "/")
+		return
+	}
 	user_id, err := database.GetUserIdByUsername(db, username)
-
 	if err != nil {
-		c.Redirect(302, "/betting")
+		c.Redirect(302, "/")
+		return
 	}
-
-	vote, err := database.GetVoteByUserAndCandidate(db, user_id, id)
+	balance, err := database.GetBalanceByUserID(db, user_id)
+	// Handle error
+	fmt.Println("balance: ", balance)
 	if err != nil {
+		c.Redirect(302, "/")
+		return
+	}
+
+	if balance > value {
+		fmt.Println("balance>value")
+		// Get the candidate id from the url
+		candidateID := c.Param("id")
+		id, _ := strconv.Atoi(candidateID)
+
+		vote, _ := database.GetVoteByUserAndCandidate(db, user_id, id)
+
+		fmt.Println("vote.VoteID: ", vote.VoteID)
+		if vote.VoteID == 0 && value > 0 {
+			fmt.Println("Register vote")
+			database.RegisterVote(db, user_id, id, "win", value)
+		} else {
+			c.Redirect(302, "/betting")
+			return
+		}
+
+		database.UpdateBalance(db, user_id, -value)
+
 		c.Redirect(302, "/betting")
-	}
+		return
+	} else {
+		c.HTML(http.StatusOK, "articles/error.html", gin.H{
+			"error": "Insufficient balance!"})
 
-	if vote.VoteID == 0 && vote.UserID == 0 && vote.CandidateID == 0 && vote.VoteType == "" {
-		database.RegisterVote(db, user_id, id, "win")
+		return
 	}
-
-	c.Redirect(302, "/betting")
 }
 
 func VoteLose(c *gin.Context) {
+	var data Amount
+	c.Bind(&data)
+	value := data.Amount
 	// Get the candidate id from the url
 	candidateID := c.Param("id")
-	fmt.Println("id: ", candidateID)
 	id, _ := strconv.Atoi(candidateID)
 	fmt.Println("id: ", id)
 
@@ -138,7 +171,6 @@ func VoteLose(c *gin.Context) {
 	if err != nil {
 		c.Redirect(302, "/")
 	}
-
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -153,13 +185,23 @@ func VoteLose(c *gin.Context) {
 		c.Redirect(302, "/betting")
 	}
 
-	vote, err := database.GetVoteByUserAndCandidate(db, user_id, id)
-	if err != nil {
-		c.Redirect(302, "/betting")
-	}
+	vote, _ := database.GetVoteByUserAndCandidate(db, user_id, id)
 
 	if vote.VoteID == 0 && vote.UserID == 0 && vote.CandidateID == 0 && vote.VoteType == "" {
-		database.RegisterVote(db, user_id, id, "lose")
+		balance, err := database.GetBalanceByUserID(db, user_id)
+		if err != nil {
+			c.HTML(http.StatusOK, "articles/error.html", gin.H{
+				"error": "Error getting balance!"})
+			return
+		}
+		if balance > value {
+			database.UpdateBalance(db, user_id, -value)
+			database.RegisterVote(db, user_id, id, "lose", value)
+		} else {
+			c.HTML(http.StatusOK, "articles/error.html", gin.H{
+				"error": "Insufficient balance!"})
+			return
+		}
 	}
 
 	c.Redirect(302, "/betting")
@@ -198,6 +240,7 @@ func VoteClear(c *gin.Context) {
 	}
 
 	if vote.VoteID != 0 {
+		database.UpdateBalance(db, user_id, vote.Amount)
 		database.ClearVote(db, vote.VoteID)
 	}
 
