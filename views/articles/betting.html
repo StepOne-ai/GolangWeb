@@ -71,11 +71,11 @@
                 </div>
                 <div class="col-lg-6 vh-100">
                     <h1>All Candidates</h1>
-                    <!-- <h2 
+                    <h2 
                     hx-get="/timer"
                     hx-trigger="every 1s"
                     hx-boost="true">
-                    </h2> -->
+                    </h2>
                     <ul class="list-group" id="card-list">
                         {{ with .candidates }}
                             {{ range . }}
@@ -91,11 +91,11 @@
     {{ if ne .adminAccess "true" }}
     <div class="container mt-4">
         <h1>All Candidates</h1>
-        <!-- <h2 
+        <h2 
         hx-get="/timer"
         hx-trigger="every 1s"
         hx-boost="true">
-        </h2> -->
+        </h2>
         <ul class="list-group " id="card-list">
             {{ with .candidates }}
                 {{ range . }}

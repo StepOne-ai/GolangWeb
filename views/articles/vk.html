@@ -1,0 +1,18 @@
+{{ define "articles/vk.html" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>{{ .first_name }} {{ .last_name }}</h1>
+    <h1>{{ .bdate }}</h1>
+    <h1>{{ .university_name }}</h1>
+    <h1>{{ .city }}</h1>
+    <h1>{{ .faculty_name }}</h1>
+    <img src="{{ .photo_200_orig }}" alt="">
+</body>
+</html>
+{{ end }}

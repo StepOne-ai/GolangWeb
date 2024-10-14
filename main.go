@@ -6,6 +6,7 @@ import (
 	"dbgolang/controllers"
 	"dbgolang/database"
 	u "dbgolang/users"
+    vk "dbgolang/vk"
 	"fmt"
 	"log"
 	"strconv"
@@ -81,6 +82,14 @@ func main() {
     r.GET("/account/:username", u.Account)
     r.POST("/account/update/new", u.AccountUpdate)
 
+
+    //VK
+    r.GET("/account/:username/details", vk.VkDetails)
+    r.GET("/login/vk", vk.VkLogin)
+    r.GET("/register/vk", vk.VkRegister)
+
+    r.GET("/callback", vk.CallbackHandler)
+
     //Handle betting system
     r.GET("/betting", betting.BettingIndex)
     r.POST("/betting/new", betting.BettingPost)
@@ -112,32 +121,24 @@ func main() {
         c.Redirect(302, "/betting")
     })
 
-    var time2 int64 = 1727611263
+    var time2 int64 = 1728500263
     r.GET("/timer", func(ctx *gin.Context) {
         currentTime := time.Now()
         seconds := currentTime.Unix()
         time := time2 + count - seconds
+        time = 0
         day := strconv.Itoa(int(time/(60*60*24)))
         hours := strconv.Itoa(int(time/(60*60)%24))
         minutes := strconv.Itoa(int(time/(60)%60))
         secs := strconv.Itoa(int(time%60))
         ctx.HTML(200, "articles/timer.html", gin.H{
             "time": day + "d " + hours + "h " + minutes + "m " + secs + "s",
+            "left": time,
         })
     })
 
-    r.GET("/results", func(ctx *gin.Context) {
-        if time2 - count + time.Now().Unix() == 0 {
-            // 1. Simulate results 50/50 for each candidate
-            // 2. Remove all candidates
-            // 3. Pay out to users based on coefficients
-            return
-        } else {
-            ctx.Redirect(302, "/")
-            return
-        }
-    })
+    r.GET("/results", betting.Results)
 
 	log.Println("Server started at localhost:3000")
-	r.Run(":3000")
+	r.Run(":http")
 }

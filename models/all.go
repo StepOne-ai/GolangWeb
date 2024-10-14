@@ -33,5 +33,14 @@ type Vote struct {
 type Wallet struct {
 	WalletID int
 	UserID int
-	Balance float64
+	Balance int
+}
+
+type Result struct {
+	ResultID int
+	Result bool
+	Candidate string
+	UpVotes int
+	DownVotes int
+	Coefficient float64
 }

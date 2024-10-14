@@ -7,6 +7,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	m "dbgolang/models"
+	"math/rand"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -245,4 +248,81 @@ func VoteClear(c *gin.Context) {
 	}
 
 	c.Redirect(302, "/betting")
+}
+
+func BettingCoefficient(upvotes, downvotes int, result bool) float64 {
+	// Calculate the probability of the event happening (upvotes / total votes)
+	probability := float64(upvotes) / float64(upvotes+downvotes)
+
+	// Calculate the coefficient using the formula: 1 / probability
+	coefficient := 1 / probability
+
+	// Apply a margin to the coefficient to ensure the betting company makes a profit
+	margin := 0.01 // 1% margin
+	coefficient = coefficient * (1 + margin)
+
+	return coefficient
+}
+
+func Results(c *gin.Context) {
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	candidates, err := database.GetAllCandidates(db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var Results []m.Result
+
+	username, err := c.Cookie("username")
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+
+	user_id, err := database.GetUserIdByUsername(db, username)
+
+
+	for _, candidate := range candidates {
+		upvotes, downvotes := database.GetVotesByCandidate(db, candidate.CandidateID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		localRand :=rand.New(rand.NewSource(time.Now().UnixNano()))
+		output := false
+		random := localRand.Intn(1000)
+		if random%2 == 0 {
+			output = true
+		}
+		vote, err := database.GetVoteByUserAndCandidate(db,  user_id, candidate.CandidateID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(vote)
+		coefficient := BettingCoefficient(upvotes, downvotes, output)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		result := m.Result{
+			Candidate: candidate.Name,
+			UpVotes:   upvotes,
+			DownVotes: downvotes,
+			Coefficient: coefficient,
+		}
+		Results = append(Results, result)
+
+		c.HTML(http.StatusOK, "articles/results.html", gin.H{
+			"Results": Results,
+		})
+	}
+
+	c.HTML(http.StatusOK, "articles/results.html", gin.H{
+		"Candidates": candidates,
+	})
 }

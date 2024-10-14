@@ -8,18 +8,18 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <form class="form-control"
-                    action="vote/win/{{ .CandidateID }}" method="POST">
-                    <div class="mb-3">
-                        <label for="amount" class="form-label">Amount</label>
-                        <input type="number" 
-                        class="form-control" 
-                        id="amount"
-                        name="amount"
-                        aria-describedby="amountHelp" 
-                        placeholder="Enter Amount"
-                        required>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
+                action="vote/win/{{ .CandidateID }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Win</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount ($)" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
                 </form>
             </div>
         </div>
@@ -34,7 +34,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount ($)">
+                    <input type="text" class="form-control" name="amount" id="amount" placeholder="Enter Amount ($)" required>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -44,6 +44,5 @@
             </div>
         </div>
     </div>
-
 </li>
 {{ end }}

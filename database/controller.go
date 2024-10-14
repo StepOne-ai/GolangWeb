@@ -677,3 +677,20 @@ func ClearVote(db *sql.DB, voteID int) error {
 
     return nil
 }
+
+func GetVotesByCandidate(db *sql.DB, candidateID int) (int, int) {
+    stmt, err := db.Prepare(`SELECT UpVotes, DownVotes FROM Candidates WHERE CandidateID = ?`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer stmt.Close()
+
+    var upVotes int
+    var downVotes int
+    err = stmt.QueryRow(candidateID).Scan(&upVotes, &downVotes)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    return upVotes, downVotes
+}

@@ -1,3 +1,7 @@
 {{ define "articles/timer.html" }}
-{{ .time }}
+    {{ if eq .left 0 }}
+        <h1>Result are ready time has elapsed !<a href="/results" class="btn btn-primary">See results</a></h1>
+    {{ else }}
+        {{ .time }}
+    {{ end }}
 {{ end }}

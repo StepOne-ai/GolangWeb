@@ -56,6 +56,74 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background-color: #3e8e41;
 }
+
+.vk-button {
+  height: 40px;
+  border-width: 0;
+  border-radius: 5px;
+  white-space: nowrap;
+  box-shadow: 0px 0px 5px rgba(0,0,0,.08);
+  transition-property: background-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+  padding: 0;
+  font-family: sans-serif;
+  outline: none;
+  background-color: #5181B8;
+  color: #fff;
+  cursor: pointer;
+  &:focus,
+  &:hover {
+    box-shadow: 1px 4px 5px 1px rgba(0,0,0,0.1);
+  }
+  
+  &:active {
+    background-color: #e5e5e5;
+    box-shadow: none;
+    transition-duration: 10ms;
+  }
+}
+    
+.vk-button__icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 8px 0 8px 8px;
+  width: 28px;
+  height: 26px;
+  box-sizing: border-box;
+  background-image: url('https://vk.com/images/svg_icons/logo.svg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.vk__icon--plus {
+  width: 27px;
+}
+
+.vk-button__text {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Roboto', arial, sans-serif;
+}
+
+
+
+
+
+/* Custom styles */
+
+
+/* hover animation */
+.vk-button:hover {
+  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
 </style>
 <body>
     <form class="login-form"
@@ -71,7 +139,14 @@ button[type="submit"]:hover {
         <div class="input-group">
             <input type="password" id="password" name="password" placeholder="********" required>
           </div>
-        <button type="submit">Create</button>
+        <button type="submit" style="margin-bottom: 5px; width: 193px;">Create</button>
+        <button type="button" class="vk-button">
+          <a href="/register/vk" style="text-decoration: none; color: white; margin-bottom: 10px;">
+          <span class="vk-button__icon">
+          </span>
+          <span class="vk-button__text">Войти через ВК</span>
+        </a>
+        </button>
         <span><a href="/login" style="margin-top: 10px;outline: none; text-decoration: none">Already have an account?</a></span>
       </form>
 </body>
