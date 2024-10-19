@@ -36,10 +36,13 @@ func ArticlesIndex(c *gin.Context) {
 		articles = append(articles, articles2...)
 	}
 
+	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
+
 	c.HTML(
 		http.StatusOK,
 		"articles/index.html",
 		gin.H{
+			"avatar_url": avatar_url,
 			"articles": articles,
 			"username": username,
 		},
@@ -202,6 +205,7 @@ func ArticleShow(c *gin.Context) {
 		c.Redirect(500, "/")
 		return
 	}
+	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
     // Close database
     defer db.Close()
     c.HTML(200, "articles/article_show.html", gin.H{
@@ -210,5 +214,6 @@ func ArticleShow(c *gin.Context) {
         "Content": article.Content,
         "Author":  article.Author,
 		"username": username,
+		"avatar_url": avatar_url,
     })
 }

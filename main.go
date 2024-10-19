@@ -47,6 +47,10 @@ func main() {
     if err != nil {
         log.Fatalf("Failed to create table: %v", err)
     }
+    err = database.CreateVkTable(db)
+    if err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
 
     fmt.Println("Tables created successfully")
 

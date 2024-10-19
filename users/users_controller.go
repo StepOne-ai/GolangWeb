@@ -146,6 +146,7 @@ func RegisterPost(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	c.SetCookie("username", "", -1, "/", "localhost", false, true)
+	c.SetCookie("adminAccess", "", -1, "/", "localhost", false, true)
 	c.Redirect(
 		302,
 		"/",
@@ -182,6 +183,11 @@ func Account(c *gin.Context) {
 		log.Fatal(err)
 	}
 
+	avatar_url, err := database.GetAvatarURLByUsername(db, user.Username)
+	if err != nil {
+		avatar_url = "https://yandex.ru/images/search?pos=1&from=tabbar&img_url=https%3A%2F%2Fyt3.googleusercontent.com%2Fytc%2FAIdro_k8ktKuQmVRXjH3RzMekX2wCP6VoKl3qiVYk7TZGmTl850%3Ds900-c-k-c0x00ffffff-no-rj&text=default+avatar&rpt=simage&lr=160857"
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"articles/account.html",
@@ -191,6 +197,7 @@ func Account(c *gin.Context) {
 			"id": user.UserID,
 			"balance": balance,
 			"current_user": current_user,
+			"avatar_url": avatar_url,
 		},
 	)
 }
@@ -293,6 +300,11 @@ func AccountUpdate(c *gin.Context) {
 
 	defer db.Close()
 
+	avatar_url, err := database.GetAvatarURLByUsername(db, data.Username)
+	if err != nil {
+		avatar_url = "https://yandex.ru/images/search?pos=1&from=tabbar&img_url=https%3A%2F%2Fyt3.googleusercontent.com%2Fytc%2FAIdro_k8ktKuQmVRXjH3RzMekX2wCP6VoKl3qiVYk7TZGmTl850%3Ds900-c-k-c0x00ffffff-no-rj&text=default+avatar&rpt=simage&lr=160857"
+	}
+
 	c.HTML(
 		http.StatusOK,
 		"articles/account.html",
@@ -302,6 +314,7 @@ func AccountUpdate(c *gin.Context) {
 			"id": user.UserID,
 			"balance": balance,
 			"current_user": data.Username,
+			"avatar_url": avatar_url,
 		},
 	)
 }

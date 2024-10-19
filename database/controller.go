@@ -694,3 +694,107 @@ func GetVotesByCandidate(db *sql.DB, candidateID int) (int, int) {
 
     return upVotes, downVotes
 }
+
+//Vk part
+
+func CreateVkTable(db *sql.DB) error {
+    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS VkUsers (
+        UserID INTEGER NOT NULL,
+        BDate VARCHAR(255),
+        Photo200Orig VARCHAR(255),
+        Interests VARCHAR(255),
+        About VARCHAR(255),
+        Activities VARCHAR(255),
+        University INT,
+        UniversityName VARCHAR(255),
+        Faculty INT,
+        FacultyName VARCHAR(255),
+        Graduation INT,
+        HomeTown VARCHAR(255),
+        InspiredBy VARCHAR(255),
+        Schools VARCHAR(255),
+        Sex INT,
+        FirstName VARCHAR(255),
+        LastName VARCHAR(255),
+        CanAccessClosed BOOLEAN,
+        IsClosed BOOLEAN,
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    )`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare create table statement: %w", err)
+    }
+    _, err = stmt.Exec()
+    if err != nil {
+        return fmt.Errorf("failed to execute create table statement: %w", err)
+    }
+    return nil
+}
+
+func CreateVkUser(db *sql.DB, info m.VkUserInfo) (m.VkUserInfo, error) {
+    stmt, err := db.Prepare(`INSERT INTO VkUsers (
+        UserID,
+        BDate,
+        Photo200Orig,
+        Interests,
+        About,
+        Activities,
+        University,
+        UniversityName,
+        Faculty,
+        FacultyName,
+        Graduation,
+        HomeTown,
+        InspiredBy,
+        Schools,
+        Sex,
+        FirstName,
+        LastName,
+        CanAccessClosed,
+        IsClosed
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    if err != nil {
+        return m.VkUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
+    }
+    _, err = stmt.Exec(
+        info.ID,
+        info.BDate,
+        info.Photo200Orig,
+        info.Interests,
+        info.About,
+        info.Activities,
+        info.University,
+        info.UniversityName,
+        info.Faculty,
+        info.FacultyName,
+        info.Graduation,
+        info.HomeTown,
+        info.InspiredBy,
+        info.Schools,
+        info.Sex,
+        info.FirstName,
+        info.LastName,
+        info.CanAccessClosed,
+        info.IsClosed,
+    )
+    if err != nil {
+        return m.VkUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
+    }
+
+    return info, nil
+}
+
+func GetAvatarURLByUsername(db *sql.DB, username string) (string, error) {
+    stmt, err := db.Prepare(`SELECT Photo200Orig FROM VkUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
+    if err != nil {
+        return "", fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var avatarURL string
+    err = stmt.QueryRow(username).Scan(&avatarURL)
+    if err != nil {
+        return "", fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return avatarURL, nil
+}

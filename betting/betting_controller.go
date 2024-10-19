@@ -38,7 +38,10 @@ func BettingIndex(c *gin.Context) {
 		log.Fatal(err)
 	}
 
+	avatar_url, err := database.GetAvatarURLByUsername(db, username)
+
 	c.HTML(http.StatusOK, "articles/betting.html", gin.H{
+		"avatar_url": avatar_url,
 		"username": username,
 		"candidates": candidates,
 		"adminAccess": adminAccess,

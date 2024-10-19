@@ -44,3 +44,25 @@ type Result struct {
 	DownVotes int
 	Coefficient float64
 }
+
+type VkUserInfo struct {
+	ID           int   
+	BDate        string 
+	Photo200Orig string 
+	Interests    string
+	About        string
+	Activities   string 
+	University   int   
+	UniversityName string 
+	Faculty      int   
+	FacultyName  string 
+	Graduation   int    
+	HomeTown     string 
+	InspiredBy	 string
+	Schools      string
+	Sex          int         
+	FirstName    string        
+	LastName     string        
+	CanAccessClosed bool        
+	IsClosed     bool         
+}

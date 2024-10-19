@@ -1,6 +1,9 @@
 package vk
 
 import (
+	"database/sql"
+	"dbgolang/database"
+	"dbgolang/models"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -45,14 +48,11 @@ func VkDetails(c *gin.Context) {
 	)
 }
 
-
-
 func VkRegister(c *gin.Context) {
-	c.HTML(
-		http.StatusOK,
-		"articles/vk.html",
-		gin.H{},
-	)
+	setChallengeAndVerifier()
+	url_for_code := "https://id.vk.com/authorize?response_type=code&client_id=52467139&scope=email%20phone&redirect_uri=http://localhost/callback&state=state&code_challenge="+challenge+"&code_challenge_method=s256"
+
+	http.Redirect(c.Writer, c.Request, url_for_code, http.StatusFound)
 }
 
 func VkLogin(c *gin.Context) {
@@ -142,25 +142,122 @@ func CallbackHandler(c *gin.Context) {
 	// Print the response
 	fmt.Println(userResponse.Response[0].FirstName)
 
-	c.HTML(
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	pot_user, _ := database.GetUserByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
+	if pot_user.UserID == 0 {
+		if database.InsertUser(db, 
+			string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName), 
+			"Пусто", 
+			"") {
+				user_id, _ := database.GetUserIdByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
+				schoolsStr := ""
+				for _, school := range userResponse.Response[0].Schools {
+					schoolsStr += fmt.Sprintf("%v, ", school)
+				}
+				database.CreateVkUser(db, models.VkUserInfo{
+					ID:           user_id,
+					BDate:        userResponse.Response[0].BDate,
+					Photo200Orig: userResponse.Response[0].Photo200Orig,
+					Interests:    userResponse.Response[0].Interests,
+					About:        userResponse.Response[0].About,
+					Activities:   userResponse.Response[0].Activities,
+					University:   userResponse.Response[0].University,
+					UniversityName: userResponse.Response[0].UniversityName,
+					Faculty:      userResponse.Response[0].Faculty,
+					FacultyName:  userResponse.Response[0].FacultyName,
+					Graduation:   userResponse.Response[0].Graduation,
+					HomeTown:     userResponse.Response[0].HomeTown,
+					InspiredBy:   userResponse.Response[0].Personal.InspiredBy,
+					Schools:      schoolsStr,
+					Sex:          userResponse.Response[0].Sex,
+					FirstName:    userResponse.Response[0].FirstName,
+					LastName:     userResponse.Response[0].LastName,
+					CanAccessClosed: userResponse.Response[0].CanAccessClosed,
+					IsClosed:     userResponse.Response[0].IsClosed,
+				})
+				vk_user, err := database.GetUserByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
+				if err != nil {
+					log.Fatal(err)
+				}
+				database.CreateWallet(db, vk_user.UserID)
+				wallet, err := database.GetBalanceByUserID(db, vk_user.UserID)
+				if err != nil {
+					log.Fatal(err)
+				}
+				c.SetCookie("username", string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName), 3600, "/", "", false, true)
+				c.HTML(
+				http.StatusOK,
+				"articles/account.html",
+					gin.H{
+						"current_user": string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName),
+						"username": vk_user.Username,
+						"email": vk_user.Email,
+						"id": vk_user.UserID,
+						"balance": wallet,
+						"avatar_url": userResponse.Response[0].Photo200Orig,
+					},
+				)
+			}
+	} else {
+		user_id, _ := database.GetUserIdByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
+		schoolsStr := ""
+		for _, school := range userResponse.Response[0].Schools {
+			schoolsStr += fmt.Sprintf("%v, ", school)
+		}
+		_, err := database.CreateVkUser(db, models.VkUserInfo{
+			ID:           user_id,
+			BDate:        userResponse.Response[0].BDate,
+			Photo200Orig: userResponse.Response[0].Photo200Orig,
+			Interests:    userResponse.Response[0].Interests,
+			About:        userResponse.Response[0].About,
+			Activities:   userResponse.Response[0].Activities,
+			University:   userResponse.Response[0].University,
+			UniversityName: userResponse.Response[0].UniversityName,
+			Faculty:      userResponse.Response[0].Faculty,
+			FacultyName:  userResponse.Response[0].FacultyName,
+			Graduation:   userResponse.Response[0].Graduation,
+			HomeTown:     userResponse.Response[0].HomeTown,
+			InspiredBy:    userResponse.Response[0].Personal.InspiredBy,
+			Schools:      schoolsStr,
+			Sex:          userResponse.Response[0].Sex,
+			FirstName:    userResponse.Response[0].FirstName,
+			LastName:     userResponse.Response[0].LastName,
+			CanAccessClosed: userResponse.Response[0].CanAccessClosed,
+			IsClosed:     userResponse.Response[0].IsClosed,
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		vk_user, err := database.GetUserByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
+		if err != nil {
+			log.Fatal(err)
+		}
+		wallet, err := database.GetBalanceByUserID(db, vk_user.UserID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		c.SetCookie("username", string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName), 3600, "/", "", false, true)
+		c.HTML(
 		http.StatusOK,
-		"articles/vk.html",
-		gin.H{
-			"first_name": userResponse.Response[0].FirstName,
-			"last_name": userResponse.Response[0].LastName,
-			"bdate": userResponse.Response[0].BDate,
-			"interests": userResponse.Response[0].Interests,
-			"about": userResponse.Response[0].About,
-			"activities": userResponse.Response[0].Activities,
-			"university_name": userResponse.Response[0].UniversityName,
-			"faculty_name": userResponse.Response[0].FacultyName,
-			"graduation": strconv.Itoa(userResponse.Response[0].Graduation),
-			"home_town": userResponse.Response[0].HomeTown,
-			"inspired_by": userResponse.Response[0].Personal.InspiredBy,
-			"photo_200_orig": userResponse.Response[0].Photo200Orig,
-			"sex": strconv.Itoa(userResponse.Response[0].Sex),
-		},
-	)
+		"articles/account.html",
+			gin.H{
+				"current_user": string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName),
+				"username": vk_user.Username,
+				"email": vk_user.Email,
+				"id": vk_user.UserID,
+				"balance": wallet,
+				"avatar_url": userResponse.Response[0].Photo200Orig,
+			},
+		)
+	}
 }
 
 type TokenResponse struct {
