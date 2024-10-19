@@ -206,35 +206,9 @@ func CallbackHandler(c *gin.Context) {
 				)
 			}
 	} else {
-		user_id, _ := database.GetUserIdByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
 		schoolsStr := ""
 		for _, school := range userResponse.Response[0].Schools {
 			schoolsStr += fmt.Sprintf("%v, ", school)
-		}
-		_, err := database.CreateVkUser(db, models.VkUserInfo{
-			ID:           user_id,
-			BDate:        userResponse.Response[0].BDate,
-			Photo200Orig: userResponse.Response[0].Photo200Orig,
-			Interests:    userResponse.Response[0].Interests,
-			About:        userResponse.Response[0].About,
-			Activities:   userResponse.Response[0].Activities,
-			University:   userResponse.Response[0].University,
-			UniversityName: userResponse.Response[0].UniversityName,
-			Faculty:      userResponse.Response[0].Faculty,
-			FacultyName:  userResponse.Response[0].FacultyName,
-			Graduation:   userResponse.Response[0].Graduation,
-			HomeTown:     userResponse.Response[0].HomeTown,
-			InspiredBy:    userResponse.Response[0].Personal.InspiredBy,
-			Schools:      schoolsStr,
-			Sex:          userResponse.Response[0].Sex,
-			FirstName:    userResponse.Response[0].FirstName,
-			LastName:     userResponse.Response[0].LastName,
-			CanAccessClosed: userResponse.Response[0].CanAccessClosed,
-			IsClosed:     userResponse.Response[0].IsClosed,
-		})
-
-		if err != nil {
-			log.Fatal(err)
 		}
 		vk_user, err := database.GetUserByUsername(db, string(userResponse.Response[0].FirstName + " " + userResponse.Response[0].LastName))
 		if err != nil {
