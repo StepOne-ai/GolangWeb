@@ -86,7 +86,6 @@ func main() {
     r.GET("/account/:username", u.Account)
     r.POST("/account/update/new", u.AccountUpdate)
 
-
     //VK
     r.GET("/account/:username/details", vk.VkDetails)
     r.GET("/login/vk", vk.VkLogin)

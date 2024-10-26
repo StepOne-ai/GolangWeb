@@ -156,24 +156,30 @@ func Logout(c *gin.Context) {
 func Account(c *gin.Context) {
 	username := c.Param("username")
 
+	
+	current_user, err := c.Cookie("username")
+
+	if err != nil {
+		c.Redirect(302, "/")
+		return
+	}
+
+	if current_user == "" {
+		c.Redirect(302, "/articles")
+		return
+	}
+
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 		if err != nil {
 		log.Fatal(err)
 	}
-		defer db.Close()
+	defer db.Close()
 
 	user, err := database.GetUserByUsername(db, username)
 
 	if err != nil {
 		c.Redirect(302, "/articles")
-		return
-	}
-
-	current_user, err := c.Cookie("username")
-
-	if err != nil {
-		c.Redirect(302, "/")
 		return
 	}
 

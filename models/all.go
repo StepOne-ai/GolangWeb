@@ -20,6 +20,9 @@ type Candidate struct {
 	Group string
 	UpVotes int
 	DownVotes int
+	Points int
+	WinCoefficient float64
+	LoseCoefficient float64
 }
 
 type Vote struct {

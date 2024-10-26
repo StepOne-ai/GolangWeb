@@ -245,7 +245,6 @@ type TokenResponse struct {
 	Scope string `json:"scope"`
 }
 
-// obtained token.
 func getAccessToken(code string, device_id string) (*TokenResponse, error) {
 
 	tokenURL := "https://id.vk.com/oauth2/auth"

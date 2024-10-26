@@ -15,6 +15,60 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// func readExcelFile(filename string) error {
+//     f, err := excelize.OpenFile(filename)
+//     if err != nil {
+//         return fmt.Errorf("error opening file: %w", err)
+//     }
+//     defer func() {
+//         if err := f.Close(); err != nil {
+//             fmt.Printf("Error closing file: %v\n", err)
+//         }
+//     }()
+
+//     sheetName := "Лист1" // Замените на имя листа, который хотите прочитать
+//     rowNumber := 6
+
+//     for {
+//         cell, err := f.GetCellValue(sheetName, fmt.Sprintf("B%d", rowNumber))
+//         if err != nil {
+//             return fmt.Errorf("error getting cell value: %w", err)
+//         }
+
+//         if cell == "" {
+//             break // Достигнут пустой ряд, можно прервать чтение
+//         }
+// 		// Add a candidate
+//         fmt.Printf("Row %d: %s\n", rowNumber, cell)
+//         rowNumber++
+//     }
+
+//     return nil
+// }
+
+// func getExcelSheets(filename string) error {
+//     f, err := excelize.OpenFile(filename)
+//     if err != nil {
+//         return fmt.Errorf("error opening file: %w", err)
+//     }
+//     defer func() {
+//         if err := f.Close(); err != nil {
+//             fmt.Printf("Error closing file: %v\n", err)
+//         }
+//     }()
+
+//     // Получаем список всех листов
+//     sheets := f.GetSheetList()
+
+//     // Итерируемся по списку листов и выводим информацию о каждом
+// 	for _, sheetName := range sheets {
+// 		fmt.Printf("Лист: %s\n", sheetName)
+// 	}
+
+//     return nil
+// }
+
+
 func BettingIndex(c *gin.Context) {
 	username, err := c.Cookie("username")
 
@@ -33,12 +87,13 @@ func BettingIndex(c *gin.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.Close()
 	candidates, err := database.GetAllCandidates(db)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	avatar_url, err := database.GetAvatarURLByUsername(db, username)
+	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
 
 	c.HTML(http.StatusOK, "articles/betting.html", gin.H{
 		"avatar_url": avatar_url,

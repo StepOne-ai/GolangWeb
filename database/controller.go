@@ -1,14 +1,21 @@
 package database
 
 import (
-    "database/sql"
-    "fmt"
-    "log"
+	"database/sql"
+	"fmt"
+	"log"
+	"strconv"
+	"strings"
 
-    _ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
+
+	m "dbgolang/models"
 
 	"golang.org/x/crypto/bcrypt"
-	m "dbgolang/models"
+
+	//"github.com/xuri/excelize/v2"
+
+	openai "github.com/StepOne-ai/chatgpt_golang"
 )
 func GetUsers(db *sql.DB) ([]m.User, error) {
     rows, err := db.Query("SELECT UserID, Username, Password FROM Users")
@@ -376,6 +383,9 @@ func CreateTableCandidates(db *sql.DB) error {
         GroupName TEXT NOT NULL,
         UpVotes INTEGER DEFAULT 0,
         DownVotes INTEGER DEFAULT 0,
+        Points INTEGER DEFAULT 0,
+        WinCoefficient FLOAT DEFAULT 1,
+        LoseCoefficient FLOAT DEFAULT 1,
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`)
     if err != nil {
@@ -385,6 +395,40 @@ func CreateTableCandidates(db *sql.DB) error {
     if err != nil {
         return fmt.Errorf("failed to execute create table statement: %w", err)
     }
+    //Add Candidates from excel
+
+    // f, err := excelize.OpenFile("./candidates.xlsx")
+    // if err != nil {
+    //     return fmt.Errorf("error opening file: %w", err)
+    // }
+    // defer func() {
+    //     if err := f.Close(); err != nil {
+    //         fmt.Printf("Error closing file: %v\n", err)
+    //     }
+    // }()
+
+    // sheetName := "Лист1" // Замените на имя листа, который хотите прочитать
+    // rowNumber := 6
+
+    // for {
+    //     cell, err := f.GetCellValue(sheetName, fmt.Sprintf("B%d", rowNumber))
+    //     points, _ := f.GetCellValue(sheetName, fmt.Sprintf("AG%d", rowNumber))
+    //     if err != nil {
+    //         return fmt.Errorf("error getting cell value: %w", err)
+    //     }
+
+    //     if cell == "" {
+    //         break // Достигнут пустой ряд, можно прервать чтение
+    //     }
+	// 	// Add a candidate
+    //     points1, _ := strconv.Atoi(points)
+    //     candidate := m.Candidate{CandidateID: 0, Name: cell, Group: "ИУ6-32Б", Points: points1}
+    //     err = CreateNewCandidateAI(db, &candidate)
+    //     if err != nil {
+    //         return fmt.Errorf("error creating candidate: %w", err)
+    //     }
+    //     rowNumber++
+    // }
     return nil
 }
 
@@ -402,6 +446,45 @@ func CreateNewCandidate(db *sql.DB, name string, group string) (m.Candidate, err
 
     return m.Candidate{CandidateID: 0, Name: name, Group: group, UpVotes: 0, DownVotes: 0}, nil
 }
+
+func CreateNewCandidateAI(db *sql.DB, candidate *m.Candidate) error {
+    stmt, err := db.Prepare(`INSERT INTO Candidates (Name, GroupName, Points, WinCoefficient, LoseCoefficient) VALUES (?, ?, ?, ?, ?)`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare insert statement: %w", err)
+    }
+
+    // Calculate coefficient
+    client := openai.CreateClient("sk-590FLVnsLoUlKCTRrpSPSC31eQMXkY4Y")
+
+    resp, _ := openai.GenerateResponse(client, fmt.Sprintf(`
+    Твоя задача поработать алгоритмом расчета букмекерского коэффициента 
+    основываясь на количество поинтов у студента. Коэффициент того, что студента отчислят
+    в конце семестра, зависит от количества поинтов у студента и максимального количества поинтов.
+
+    Количество поинтов у студента: %d
+
+    Максимальное количество поинтов: 200
+
+    Твой ответ должен быть в виде 2х перечисленныъ коэффициентов через запятую. Коэффициент того, что студента отчислят и коэффициент того, что студента не отчислят.
+    Формат ответа должен быть в любом случае такой как показан дальше и никак иначе: 2.32,3.37
+
+    Не забывай, что коэффициент должен быть выгодным букмекерской конторе!
+    `, candidate.Points),"gpt-4o-mini")
+
+    w := strings.Split(resp, ",")[0]
+    l := strings.Split(resp, ",")[1]
+
+    win, _ := strconv.ParseFloat(w, 64)
+    lose, _ := strconv.ParseFloat(l, 64)
+
+    _, err = stmt.Exec(candidate.Name, candidate.Group, candidate.Points, win, lose)
+    if err != nil {
+        return fmt.Errorf("failed to execute insert statement: %w", err)
+    }
+
+    return nil
+}
+
 
 func GetCandidatesFromGroup(db *sql.DB, group_name string) ([]m.Candidate, error) {
     stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates WHERE Group = ?`)
@@ -435,7 +518,7 @@ func GetCandidatesFromGroup(db *sql.DB, group_name string) ([]m.Candidate, error
 }
 
 func GetAllCandidates(db *sql.DB) ([]m.Candidate, error) {
-    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates`)
+    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates`)
     if err != nil {
         return nil, fmt.Errorf("failed to prepare select statement: %w", err)
     }
@@ -451,7 +534,7 @@ func GetAllCandidates(db *sql.DB) ([]m.Candidate, error) {
 
     for rows.Next() {
         var candidate m.Candidate
-        if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes);
+        if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient);
         err != nil {
             return nil, fmt.Errorf("failed to scan row: %w", err)
         }
