@@ -454,7 +454,7 @@ func CreateNewCandidateAI(db *sql.DB, candidate *m.Candidate) error {
     }
 
     // Calculate coefficient
-    client := openai.CreateClient("sk-590FLVnsLoUlKCTRrpSPSC31eQMXkY4Y")
+    client := openai.CreateClient("")
 
     resp, _ := openai.GenerateResponse(client, fmt.Sprintf(`
     Твоя задача поработать алгоритмом расчета букмекерского коэффициента 
