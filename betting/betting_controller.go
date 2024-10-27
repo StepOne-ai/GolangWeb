@@ -384,3 +384,38 @@ func Results(c *gin.Context) {
 		"Candidates": candidates,
 	})
 }
+
+// Searching 
+
+func Search(c *gin.Context) {
+	username, err := c.Cookie("username")
+
+	if err != nil {
+		c.Redirect(302, "/")
+	}
+	// Get query
+	query := c.Query("query")
+	if query == "" {
+		c.Redirect(302, "/betting")
+		return
+	}
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	candidates, err := database.SearchCandidates(db, query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
+	c.HTML(http.StatusOK, "articles/search.html", gin.H{
+		"candidates": candidates,
+		"avatar_url": avatar_url,
+		"username": username,
+	})
+}

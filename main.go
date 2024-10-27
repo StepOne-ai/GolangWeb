@@ -141,6 +141,8 @@ func main() {
     })
 
     r.GET("/results", betting.Results)
+    
+    r.GET("/search", betting.Search)
 
 	log.Println("Server started at localhost:3000")
 	r.Run(":http")

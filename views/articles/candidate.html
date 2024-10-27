@@ -1,6 +1,9 @@
 {{ define "articles/candidate.html" }}
-<li class="list-group-item d-flex align-items-center justify-content-between">
-    <p>{{ .CandidateID }}. {{ .Name }} {{ .Group }}</p><p>{{ .UpVotes }}✅ {{ .DownVotes }}❌ <p  style="color: green;">{{ .WinCoefficient }}</p> <p style="color: red;">{{ .LoseCoefficient }}</p></p>
+<li class="list-group-item d-flex align-items-center justify-content-between"
+style="p {
+    width: 20%;
+}">
+    <p>{{ .CandidateID }} </p>  <p>{{ .Name }}</p> <p>{{ .Group }}</p><p>{{ .UpVotes }}✅ {{ .DownVotes }}❌</p> <p  style="color: green;">{{ .WinCoefficient }}</p> <p style="color: red;">{{ .LoseCoefficient }}</p>
     <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal{{ .CandidateID }}" class="btn btn-success" style="width: 100px;">Win</button>
     <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal2{{ .CandidateID }}" class="btn btn-danger" style="width: 100px;">Lose</button>    
     <a href="/vote/clear/{{ .CandidateID }}" class="btn btn-primary" style="width: 100px;">Clear</a>

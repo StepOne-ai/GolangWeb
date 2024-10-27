@@ -37,7 +37,7 @@
             </div>
         </div>
     </header>
-    {{ if eq .adminAccess "true" }}
+    <!-- {{ if eq .adminAccess "true" }}
     <div class="container mt-4">
         <div class="container-fluid">
             <div class="row">
@@ -87,8 +87,7 @@
             </div>
         </div>
     </div>
-    {{ end }}
-    {{ if ne .adminAccess "true" }}
+    {{ end }} -->
     <div class="container mt-4">
         <h1>All Candidates</h1>
         <h2 
@@ -96,6 +95,16 @@
         hx-trigger="every 1s"
         hx-boost="true">
         </h2>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search...">
+            <div class="input-group-append">
+                <a href="#" id="searchBtn">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search">Search</i>
+                    </button>
+                </a>
+            </div>
+        </div>
         <ul class="list-group " id="card-list">
             {{ with .candidates }}
                 {{ range . }}
@@ -104,6 +113,22 @@
             {{ end }}
         </ul>
     </div>
-    {{ end }}
+    <script>
+        // Get the input element
+        const inputElement = document.querySelector('input[type="text"]');
+
+        // Add an event listener to the input element
+        inputElement.addEventListener('input', (e) => {
+        // Get the current value of the input element
+        const currentValue = e.target.value;
+
+        const link = document.getElementById("searchBtn")
+        link.href = "/search?query="+currentValue
+
+        // Log the current value of the input element
+        console.log(currentValue);
+
+    });
+    </script>
 </body>
 {{ end }}

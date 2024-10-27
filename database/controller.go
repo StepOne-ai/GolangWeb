@@ -881,3 +881,35 @@ func GetAvatarURLByUsername(db *sql.DB, username string) (string, error) {
 
     return avatarURL, nil
 }
+
+
+// Search
+
+func SearchCandidates(db *sql.DB, query string) ([]m.Candidate, error) {
+    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates WHERE Name LIKE ?`)
+    if err != nil {
+        return nil, fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    rows, err := stmt.Query(query+"%")
+    if err != nil {
+        return nil, fmt.Errorf("failed to execute select statement: %w", err)
+    }
+    defer rows.Close()
+
+    var candidates []m.Candidate
+    for rows.Next() {
+        var candidate m.Candidate
+        err = rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient)
+        if err != nil {
+            return nil, fmt.Errorf("failed to scan row: %w", err)
+        }
+        candidates = append(candidates, candidate)
+    }
+    if err = rows.Err(); err != nil {
+        return nil, fmt.Errorf("failed to iterate over rows: %w", err)
+    }
+
+    return candidates, nil
+}

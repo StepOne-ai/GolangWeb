@@ -1,0 +1,86 @@
+{{ define "articles/search.html" }}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+      
+        <title>Betting</title>
+      
+        <!-- Bootstrap core CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        <!-- Custom fonts for this template -->
+        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
+      
+        <!-- HTMX -->
+        <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+      
+      </head>
+<body>
+    <header class="p-3 mb-3 border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-dark text-decoration-none">
+                <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+                </a>
+                <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                    <li><a href="/logout" class="nav-link px-2 link-secondary">Logout</a></li>
+                    <li><a href="/articles" class="nav-link px-2 link-primary">Articles</a></li>
+                    <li><a href="/betting" class="nav-link px-2 link-primary">Betting</a></li>
+                </ul>
+                <a href="/account/{{ .username }}" class="text-dark text-decoration-none" style="margin-right: 10px;">{{ .username }}<img src="{{ .avatar_url }}" alt="mdo" width="52" height="52" class="rounded-circle" style="margin-left: 10px;"></a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mt-4">
+        <h1>All Candidates</h1>
+        <h2 
+        hx-get="/timer"
+        hx-trigger="every 1s"
+        hx-boost="true">
+        </h2>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Search...">
+            <div class="input-group-append">
+                <a href="#" id="searchBtn">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="fas fa-search">Search</i>
+                    </button>
+                </a>
+            </div>
+        </div>
+        <ul class="list-group " id="card-list">
+            {{ with .candidates }}
+                {{ range . }}
+                    {{ template "articles/candidate.html" . }}
+                {{ end }}
+            {{ end }}
+        </ul>
+    </div>
+    <script>
+        // Get the input element
+        const inputElement = document.querySelector('input[type="text"]');
+
+        // Add an event listener to the input element
+        inputElement.addEventListener('input', (e) => {
+        // Get the current value of the input element
+        const currentValue = e.target.value;
+
+        const link = document.getElementById("searchBtn")
+        link.href = "/search?query="+currentValue
+
+        // Log the current value of the input element
+        console.log(currentValue);
+
+    });
+    </script>
+</body>
+</html>
+
+{{ end }}
