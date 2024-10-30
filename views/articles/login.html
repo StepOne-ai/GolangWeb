@@ -105,6 +105,22 @@ button[type="submit"]:hover {
   font-family: 'Roboto', arial, sans-serif;
 }
 
+.yandex-btn {
+      background-color: #000;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+  .yandex-btn i {
+      margin-right: 10px;
+  }
+
 </style>
 <body>
     <form class="login-form" action="/login/new" method="POST">
@@ -123,6 +139,11 @@ button[type="submit"]:hover {
           <span class="vk-button__text">Войти через ВК</span>
           </a>
         </button>
+        <a href="/login/yandex" style="text-decoration: none; color: white; margin-bottom: 10px; margin-top: 5px;">
+          <span class="yandex-btn">
+            <i class="fab fa-yandex"></i> Войти с Yandex ID
+          </span>
+        </a>
         <span><a href="/register" style="margin-top: 10px;outline: none; text-decoration: none">Don't have an account?</a></span>
       </form>
 </body>

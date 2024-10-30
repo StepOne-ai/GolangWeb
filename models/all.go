@@ -69,3 +69,16 @@ type VkUserInfo struct {
 	CanAccessClosed bool        
 	IsClosed     bool         
 }
+
+type YandexUserInfo struct {
+	ID              int
+	YandexID        string
+	DisplayName     string
+	RealName        string
+	FirstName       string
+	LastName        string
+	DefaultEmail    string
+	Birthday        string
+	DefaultAvatarID string
+	Number          string
+}

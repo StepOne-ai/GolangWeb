@@ -389,7 +389,6 @@ func Results(c *gin.Context) {
 
 func Search(c *gin.Context) {
 	username, err := c.Cookie("username")
-
 	if err != nil {
 		c.Redirect(302, "/")
 	}

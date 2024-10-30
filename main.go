@@ -7,6 +7,7 @@ import (
 	"dbgolang/database"
 	u "dbgolang/users"
     vk "dbgolang/vk"
+    yandex "dbgolang/yandex"
 	"fmt"
 	"log"
 	"strconv"
@@ -48,6 +49,10 @@ func main() {
         log.Fatalf("Failed to create table: %v", err)
     }
     err = database.CreateVkTable(db)
+    if err != nil {
+        log.Fatalf("Failed to create table: %v", err)
+    }
+    err = database.CreateYandexTable(db)
     if err != nil {
         log.Fatalf("Failed to create table: %v", err)
     }
@@ -93,6 +98,10 @@ func main() {
 
     r.GET("/callback", vk.CallbackHandler)
 
+    //Yandex
+    r.GET("/login/yandex", yandex.YandexLogin)
+    r.GET("/callback_yandex", yandex.YandexCallback)
+
     //Handle betting system
     r.GET("/betting", betting.BettingIndex)
     r.POST("/betting/new", betting.BettingPost)
@@ -124,12 +133,11 @@ func main() {
         c.Redirect(302, "/betting")
     })
 
-    var time2 int64 = 1728500263
+    var time2 int64 = 1828500263
     r.GET("/timer", func(ctx *gin.Context) {
         currentTime := time.Now()
         seconds := currentTime.Unix()
         time := time2 + count - seconds
-        time = 0
         day := strconv.Itoa(int(time/(60*60*24)))
         hours := strconv.Itoa(int(time/(60*60)%24))
         minutes := strconv.Itoa(int(time/(60)%60))

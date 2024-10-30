@@ -882,6 +882,82 @@ func GetAvatarURLByUsername(db *sql.DB, username string) (string, error) {
     return avatarURL, nil
 }
 
+// Yandex part
+
+func CreateYandexTable(db *sql.DB) error {
+    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS YandexUsers (
+        UserID INTEGER NOT NULL,
+        YandexID INTEGER NOT NULL,
+        DisplayName VARCHAR(255),
+        RealName VARCHAR(255),
+        FirstName VARCHAR(255),
+        LastName VARCHAR(255),
+        DefaultEmail VARCHAR(255),
+        Birthday VARCHAR(255),
+        DefaultAvatarID VARCHAR(255),
+        Number VARCHAR(255),
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    )`)
+    if err != nil {
+        return fmt.Errorf("failed to prepare create table statement: %w", err)
+    }
+    _, err = stmt.Exec()
+    if err != nil {
+        return fmt.Errorf("failed to execute create table statement: %w", err)
+    }
+    return nil
+}
+
+func CreateYandexUser(db *sql.DB, info m.YandexUserInfo) (m.YandexUserInfo, error) {
+    stmt, err := db.Prepare(`INSERT INTO YandexUsers (
+        UserID,
+        YandexID,
+        DisplayName,
+        RealName,
+        FirstName,
+        LastName,
+        DefaultEmail,
+        Birthday,
+        DefaultAvatarID,
+        Number
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    if err != nil {
+        return m.YandexUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
+    }
+    _, err = stmt.Exec(
+        info.ID,
+        info.YandexID,
+        info.DisplayName,
+        info.RealName,
+        info.FirstName,
+        info.LastName,
+        info.DefaultEmail,
+        info.Birthday,
+        info.DefaultAvatarID,
+        info.Number,
+    )
+    if err != nil {
+        return m.YandexUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
+    }
+
+    return info, nil
+}
+
+func GetYandexAvatarURLByUsername(db *sql.DB, username string) (string, error) {
+    stmt, err := db.Prepare(`SELECT DefaultAvatarID FROM YandexUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
+    if err != nil {
+        return "", fmt.Errorf("failed to prepare select statement: %w", err)
+    }
+    defer stmt.Close()
+
+    var avatarURL string
+    err = stmt.QueryRow(username).Scan(&avatarURL)
+    if err != nil {
+        return "", fmt.Errorf("failed to execute select statement: %w", err)
+    }
+
+    return avatarURL, nil
+}
 
 // Search
 
