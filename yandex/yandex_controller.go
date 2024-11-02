@@ -25,10 +25,10 @@ const (
 )
 
 type AuthResponse struct {
-	AccessToken string `json:"access_token"`
-	ExpiresIn   int    `json:"expires_in"`
+	AccessToken  string `json:"access_token"`
+	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
-	TokenType   string `json:"token_type"`
+	TokenType    string `json:"token_type"`
 }
 
 type UserResponse struct {
@@ -88,21 +88,21 @@ func (y *Yandex) LoginHandler(c *gin.Context) {
 }
 
 type User struct {
-	ID              string `json:"id"`
-	Login           string `json:"login"`
-	ClientID        string `json:"client_id"`
-	DisplayName     string `json:"display_name"`
-	RealName        string `json:"real_name"`
-	FirstName       string `json:"first_name"`
-	LastName        string `json:"last_name"`
-	Sex             *string `json:"sex"`
-	DefaultEmail    string `json:"default_email"`
+	ID              string   `json:"id"`
+	Login           string   `json:"login"`
+	ClientID        string   `json:"client_id"`
+	DisplayName     string   `json:"display_name"`
+	RealName        string   `json:"real_name"`
+	FirstName       string   `json:"first_name"`
+	LastName        string   `json:"last_name"`
+	Sex             *string  `json:"sex"`
+	DefaultEmail    string   `json:"default_email"`
 	Emails          []string `json:"emails"`
-	Birthday        string `json:"birthday"`
-	DefaultAvatarID string `json:"default_avatar_id"`
-	IsAvatarEmpty   bool `json:"is_avatar_empty"`
+	Birthday        string   `json:"birthday"`
+	DefaultAvatarID string   `json:"default_avatar_id"`
+	IsAvatarEmpty   bool     `json:"is_avatar_empty"`
 	DefaultPhone    struct {
-		ID    int    `json:"id"`
+		ID     int    `json:"id"`
 		Number string `json:"number"`
 	} `json:"default_phone"`
 	PSUID string `json:"psuid"`
@@ -111,7 +111,6 @@ type User struct {
 // CallbackHandler returns an HTTP handler for the callback URL
 func (y *Yandex) CallbackHandler(c *gin.Context) {
 	code := c.Request.URL.Query().Get("code")
-	fmt.Println("code: ", code)
 	if code == "" {
 		http.Error(c.Writer, "Missing authorization code", http.StatusBadRequest)
 		return
@@ -147,9 +146,6 @@ func (y *Yandex) CallbackHandler(c *gin.Context) {
 		return
 	}
 
-	// Print the response
-	fmt.Println(string(body))
-
 	var authResponse AuthResponse
 	err = json.Unmarshal(body, &authResponse)
 	if err != nil {
@@ -158,7 +154,6 @@ func (y *Yandex) CallbackHandler(c *gin.Context) {
 	}
 
 	accessToken := authResponse.AccessToken
-	fmt.Printf("Access token: %s\n", accessToken)
 
 	userURL := "https://login.yandex.ru/info?format=json&oauth_token=" + accessToken
 	resp, err = http.Get(userURL)

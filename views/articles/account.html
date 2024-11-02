@@ -34,7 +34,7 @@
                     <li><a href="/articles" class="nav-link px-2 link-primary">Articles</a></li>
                     <li><a href="/betting" class="nav-link px-2 link-primary">Betting</a></li>
                 </ul>
-                <a href="/account/{{ .username }}" class="text-dark text-decoration-none" style="margin-right: 10px;">{{ .username }}<img src="{{ .avatar_url }}" alt="mdo" width="52" height="52" class="rounded-circle" style="margin-left: 10px;"></a>
+                <a href="/account/{{ .username }}" class="text-dark text-decoration-none" style="margin-right: 10px;">{{ .username }}<img src="/static/images/{{ .username }}.jpeg" alt="mdo" width="52" height="52" class="rounded-circle" style="margin-left: 10px;"></a>
             </div>
         </div>
     </header>
@@ -44,63 +44,90 @@
                 <div class="col-lg-6 vh-100">
                     <h1>Account Settings</h1>
                     <p>
-                        <form class="row g-3" 
-                            action="/account/update/new" 
+                        <form class="row g-3" action="/account/avatar" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="avatar" class="form-label">Avatar</label>
+                                <input type="file"
+                                class="form-control"
+                                id="avatar"
+                                aria-describedby="avatarHelp"
+                                name="avatar">
+                            </div>
+                            <div class="col-12" style="margin-bottom: 10px;">
+                                <button class="btn btn-primary" type="submit">
+                                    <span class="spinner-border spinner-border-sm htmx-indicator" role="status"
+                                        aria-hidden="true"
+                                        id="spinner">
+                                    </span>
+                                    Upload avatar
+                                </button>
+                            </div>
+                        </form>
+                        <form class="row g-3"
+                            action="/account/update/new"
                             method="POST">
                             <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
-                                <input type="text" 
-                                class="form-control" 
-                                id="username" 
-                                aria-describedby="usernameHelp" 
-                                name="username" 
+                                <input type="text"
+                                class="form-control"
+                                id="username"
+                                aria-describedby="usernameHelp"
+                                name="username"
                                 value="{{ .username }}"
                                 {{ if ne .current_user .username }}disabled{{ end }}>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="text" 
-                                class="form-control" 
-                                id="email" 
-                                aria-describedby="emailHelp" 
-                                name="email" 
+                                <input type="text"
+                                class="form-control"
+                                id="email"
+                                aria-describedby="emailHelp"
+                                name="email"
                                 value="{{ .email }}"
                                 {{ if ne .current_user .username }}disabled{{ end }}>
                             </div>
                             <div class="mb-3">
                                 <label for="balance" class="form-label">${{ .balance }}</label>
-                                <input type="text" 
-                                class="form-control" 
-                                id="balance" 
-                                aria-describedby="emailHelp" 
-                                name="balance" 
-                                placeholder="0.00$"
+                                <input type="text"
+                                class="form-control"
+                                id="balance"
+                                aria-describedby="emailHelp"
+                                name="balance"
+                                placeholder="0$"
                                 {{ if ne .current_user .username }}disabled{{ end }}>
                             </div>
                             {{ if eq .current_user .username }}
                             <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="text" 
-                                class="form-control" 
-                                id="password" 
-                                aria-describedby="passwordHelp" 
+                                <label for="old_password" class="form-label">Old password</label>
+                                <input type="text"
+                                class="form-control"
+                                id="old_password"
+                                aria-describedby="passwordHelp"
+                                name="old_password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">New password</label>
+                                <input type="text"
+                                class="form-control"
+                                id="password"
+                                aria-describedby="passwordHelp"
                                 name="password">
                             </div>
                             {{ end }}
                             <div class="mb-3">
                                 <label for="id" class="form-label">ID</label>
-                                <input type="text" 
-                                class="form-control" 
-                                id="id" 
-                                aria-describedby="idHelp" 
-                                name="id" 
+                                <input type="text"
+                                class="form-control"
+                                id="id"
+                                aria-describedby="idHelp"
+                                name="id"
                                 value="{{ .id }}"
                                 readonly>
                             </div>
                             {{ if eq .current_user .username }}
                             <div class="col-12">
                                 <button class="btn btn-primary" type="submit">
-                                    <span class="spinner-border spinner-border-sm htmx-indicator" role="status" 
+                                    <span class="spinner-border spinner-border-sm htmx-indicator" role="status"
                                         aria-hidden="true"
                                         id="spinner">
                                     </span>

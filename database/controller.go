@@ -17,82 +17,82 @@ import (
 
 	openai "github.com/StepOne-ai/chatgpt_golang"
 )
+
 func GetUsers(db *sql.DB) ([]m.User, error) {
-    rows, err := db.Query("SELECT UserID, Username, Password FROM Users")
-    if err != nil {
-        return nil, fmt.Errorf("failed to query users: %w", err)
-    }
-    defer rows.Close()
+	rows, err := db.Query("SELECT UserID, Username, Password FROM Users")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query users: %w", err)
+	}
+	defer rows.Close()
 
-    var users []m.User
-    for rows.Next() {
-        var u m.User
-        if err := rows.Scan(&u.UserID, &u.Username, &u.PasswordHash); err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        users = append(users, u)
-    }
+	var users []m.User
+	for rows.Next() {
+		var u m.User
+		if err := rows.Scan(&u.UserID, &u.Username, &u.PasswordHash); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		users = append(users, u)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("error iterating over rows: %w", err)
-    }
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
 
-    return users, nil
+	return users, nil
 }
 
 func GetArticles(db *sql.DB) ([]m.Article, error) {
-    rows, err := db.Query("SELECT ArticleID, Title, Author, Content FROM Articles")
-    if err != nil {
-        return nil, fmt.Errorf("failed to query articles: %w", err)
-    }
-    defer rows.Close()
+	rows, err := db.Query("SELECT ArticleID, Title, Author, Content FROM Articles")
+	if err != nil {
+		return nil, fmt.Errorf("failed to query articles: %w", err)
+	}
+	defer rows.Close()
 
-    var articles []m.Article
-    for rows.Next() {
-        var u m.Article
-        if err := rows.Scan(&u.ArticleID, &u.Title, &u.Author, &u.Content); err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        articles = append(articles, u)
-    }
+	var articles []m.Article
+	for rows.Next() {
+		var u m.Article
+		if err := rows.Scan(&u.ArticleID, &u.Title, &u.Author, &u.Content); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		articles = append(articles, u)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("error iterating over rows: %w", err)
-    }
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
 
-    return articles, nil
+	return articles, nil
 }
 
 func GetArticlesByAuthor(db *sql.DB, author string) ([]m.Article, error) {
-    rows, err := db.Query("SELECT ArticleID, Title, Author, Content FROM Articles WHERE Author = ?", author)
-    if err != nil {
-        return nil, fmt.Errorf("failed to query articles: %w", err)
-    }
-    defer rows.Close()
+	rows, err := db.Query("SELECT ArticleID, Title, Author, Content FROM Articles WHERE Author = ?", author)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query articles: %w", err)
+	}
+	defer rows.Close()
 
-    var articles []m.Article
-    for rows.Next() {
-        var u m.Article
-        if err := rows.Scan(&u.ArticleID, &u.Title, &u.Author, &u.Content); err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        articles = append(articles, u)
-    }
-    if err := rows.Err();
-    err != nil {
-        return nil, fmt.Errorf("error iterating over rows: %w", err)
-    }
+	var articles []m.Article
+	for rows.Next() {
+		var u m.Article
+		if err := rows.Scan(&u.ArticleID, &u.Title, &u.Author, &u.Content); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		articles = append(articles, u)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
 
-    return articles, nil
+	return articles, nil
 }
 
 func CheckPassword(users []m.User, username, password string) bool {
-    for _, user := range users {
-        if user.Username == username && VerifyPassword(password, user.PasswordHash) {
-            return true
-        }
-    }
-    return false
+	for _, user := range users {
+		if user.Username == username && VerifyPassword(password, user.PasswordHash) {
+			return true
+		}
+	}
+	return false
 }
 
 func VerifyPassword(providedPassword, storedHash string) bool {
@@ -101,21 +101,21 @@ func VerifyPassword(providedPassword, storedHash string) bool {
 }
 
 func CreateTableUsers(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Users (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Users (
         UserID INTEGER PRIMARY KEY AUTOINCREMENT,
         Username TEXT NOT NULL,
         Email TEXT NOT NULL,
 		Password TEXT NOT NULL,
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
 }
 
 func CreateTableArticles(db *sql.DB) error {
@@ -145,9 +145,9 @@ func HashPassword(password string) (string, error) {
 }
 
 func Login(db *sql.DB, username, password string) bool {
-    users, err := GetUsers(db)
+	users, err := GetUsers(db)
 
-	if err != nil {	
+	if err != nil {
 		log.Fatalf("Failed to get users: %v", err)
 	}
 
@@ -161,60 +161,60 @@ func Login(db *sql.DB, username, password string) bool {
 }
 
 func InsertUser(db *sql.DB, username, email string, password string) bool {
-    stmt, err := db.Prepare(`INSERT INTO Users (Username, Email, Password) VALUES (?, ?, ?)`)
-    if err != nil {
-        return false
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`INSERT INTO Users (Username, Email, Password) VALUES (?, ?, ?)`)
+	if err != nil {
+		return false
+	}
+	defer stmt.Close()
 
 	// Hashing
 	hashed, err := HashPassword(password)
 	if err != nil {
 		return false
 	}
-    _, err = stmt.Exec(username, email, hashed)
+	_, err = stmt.Exec(username, email, hashed)
 
-    if err != nil {
-        return false
-    }
+	if err != nil {
+		return false
+	}
 
-    userID, err := GetUserIdByUsername(db, username)
-    if err != nil {
-        return false
-    }
+	userID, err := GetUserIdByUsername(db, username)
+	if err != nil {
+		return false
+	}
 
-    err = CreateWallet(db, userID)
-    return err == nil
+	err = CreateWallet(db, userID)
+	return err == nil
 }
 
 func GetBalanceByUserID(db *sql.DB, userID int) (int, error) {
-    stmt, err := db.Prepare(`SELECT Balance FROM Wallets WHERE UserID = ?`)
-    if err != nil {
-        return 0, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT Balance FROM Wallets WHERE UserID = ?`)
+	if err != nil {
+		return 0, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var balance int
-    err = stmt.QueryRow(userID).Scan(&balance)
-    if err != nil {
-        return 0, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    return balance, nil
+	var balance int
+	err = stmt.QueryRow(userID).Scan(&balance)
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	return balance, nil
 }
 
 func UpdateBalance(db *sql.DB, userID int, balance int) error {
-    stmt, err := db.Prepare(`UPDATE Wallets SET Balance = Balance + ? WHERE UserID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Wallets SET Balance = Balance + ? WHERE UserID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(balance, userID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(balance, userID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func InsertArticle(db *sql.DB, title, content, author string) error {
@@ -233,34 +233,34 @@ func InsertArticle(db *sql.DB, title, content, author string) error {
 }
 
 func GetArticleID(db *sql.DB, title string) (m.Article, error) {
-    stmt, err := db.Prepare(`SELECT ArticleID FROM Articles WHERE Title = ?`)
-    if err != nil {
-        return m.Article{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT ArticleID FROM Articles WHERE Title = ?`)
+	if err != nil {
+		return m.Article{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var article m.Article
-    err = stmt.QueryRow(title).Scan(&article.ArticleID)
-    if err != nil {
-        return m.Article{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    fmt.Println("ArticleID: ", article.ArticleID)
-    return article, nil
+	var article m.Article
+	err = stmt.QueryRow(title).Scan(&article.ArticleID)
+	if err != nil {
+		return m.Article{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	fmt.Println("ArticleID: ", article.ArticleID)
+	return article, nil
 }
 
 func GetArticleByID(db *sql.DB, articleID int) (m.Article, error) {
-    stmt, err := db.Prepare(`SELECT ArticleID, Title, Content, Author FROM Articles WHERE ArticleID = ?`)
-    if err != nil {
-        return m.Article{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT ArticleID, Title, Content, Author FROM Articles WHERE ArticleID = ?`)
+	if err != nil {
+		return m.Article{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var article m.Article
-    err = stmt.QueryRow(articleID).Scan(&article.ArticleID, &article.Title, &article.Content, &article.Author)
-    if err != nil {
-        return m.Article{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    return article, nil
+	var article m.Article
+	err = stmt.QueryRow(articleID).Scan(&article.ArticleID, &article.Title, &article.Content, &article.Author)
+	if err != nil {
+		return m.Article{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	return article, nil
 }
 
 func DeleteArticle(db *sql.DB, articleID int) error {
@@ -271,7 +271,7 @@ func DeleteArticle(db *sql.DB, articleID int) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(articleID)
-    fmt.Println("Article deleted successfully!")
+	fmt.Println("Article deleted successfully!")
 	if err != nil {
 		return fmt.Errorf("failed to execute delete statement: %w", err)
 	}
@@ -280,104 +280,104 @@ func DeleteArticle(db *sql.DB, articleID int) error {
 }
 
 func UpdateArticle(db *sql.DB, articleID int, title, content string) error {
-    stmt, err := db.Prepare(`UPDATE Articles SET Title = ?, Content = ? WHERE ArticleID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
-    _, err = stmt.Exec(title, content, articleID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
-    fmt.Println("Article updated successfully!")
-    return nil
+	stmt, err := db.Prepare(`UPDATE Articles SET Title = ?, Content = ? WHERE ArticleID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(title, content, articleID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
+	fmt.Println("Article updated successfully!")
+	return nil
 }
 
 func UpdateArticleAuthor(db *sql.DB, articleID int, author string) error {
-    stmt, err := db.Prepare(`UPDATE Articles SET Author = ? WHERE ArticleID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
+	stmt, err := db.Prepare(`UPDATE Articles SET Author = ? WHERE ArticleID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
 
-    defer stmt.Close()
+	defer stmt.Close()
 
-    _, err = stmt.Exec(author, articleID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(author, articleID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func GetUserByUsername(db *sql.DB, username string) (m.User, error) {
-    stmt, err := db.Prepare(`SELECT UserID, Username, Email, Password FROM Users WHERE Username = ?`)
-    if err != nil {
-        return m.User{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT UserID, Username, Email, Password FROM Users WHERE Username = ?`)
+	if err != nil {
+		return m.User{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var user m.User
-    err = stmt.QueryRow(username).Scan(&user.UserID, &user.Username, &user.Email, &user.PasswordHash)
-    if err != nil {
-        return m.User{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var user m.User
+	err = stmt.QueryRow(username).Scan(&user.UserID, &user.Username, &user.Email, &user.PasswordHash)
+	if err != nil {
+		return m.User{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return user, nil
+	return user, nil
 }
 
 func UpdateUser(db *sql.DB, userID int, username string, email string, password string) error {
-    stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ?, Password = ? WHERE UserID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
-    hashed, err := HashPassword(password)
-    
-    if err != nil {
-        return fmt.Errorf("failed to hash password: %w", err)
-    }
+	stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ?, Password = ? WHERE UserID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
+	hashed, err := HashPassword(password)
 
-    _, err = stmt.Exec(username, email, hashed, userID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
-    fmt.Println("User updated successfully!")
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	_, err = stmt.Exec(username, email, hashed, userID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
+	fmt.Println("User updated successfully!")
+	return nil
 }
 
 func UpdateUserWithoutPassword(db *sql.DB, userID int, username string, email string) error {
-    stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ? WHERE UserID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Users SET Username = ?, Email = ? WHERE UserID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(username, email, userID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
-    fmt.Println("User updated successfully!")
-    return nil
+	_, err = stmt.Exec(username, email, userID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
+	fmt.Println("User updated successfully!")
+	return nil
 }
 
 func GetUserIdByUsername(db *sql.DB, username string) (int, error) {
-    stmt, err := db.Prepare(`SELECT UserID FROM Users WHERE Username = ?`)
-    if err != nil {
-        return 0, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT UserID FROM Users WHERE Username = ?`)
+	if err != nil {
+		return 0, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var userID int
-    err = stmt.QueryRow(username).Scan(&userID)
-    if err != nil {
-        return 0, fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var userID int
+	err = stmt.QueryRow(username).Scan(&userID)
+	if err != nil {
+		return 0, fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return userID, nil
+	return userID, nil
 }
 
 func CreateTableCandidates(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Candidates (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Candidates (
         CandidateID INTEGER PRIMARY KEY AUTOINCREMENT,
         Name TEXT NOT NULL,
         GroupName TEXT NOT NULL,
@@ -388,76 +388,76 @@ func CreateTableCandidates(db *sql.DB) error {
         LoseCoefficient FLOAT DEFAULT 1,
         CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    //Add Candidates from excel
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	//Add Candidates from excel
 
-    // f, err := excelize.OpenFile("./candidates.xlsx")
-    // if err != nil {
-    //     return fmt.Errorf("error opening file: %w", err)
-    // }
-    // defer func() {
-    //     if err := f.Close(); err != nil {
-    //         fmt.Printf("Error closing file: %v\n", err)
-    //     }
-    // }()
+	// f, err := excelize.OpenFile("./candidates.xlsx")
+	// if err != nil {
+	//     return fmt.Errorf("error opening file: %w", err)
+	// }
+	// defer func() {
+	//     if err := f.Close(); err != nil {
+	//         fmt.Printf("Error closing file: %v\n", err)
+	//     }
+	// }()
 
-    // sheetName := "Лист1" // Замените на имя листа, который хотите прочитать
-    // rowNumber := 6
+	// sheetName := "Лист1" // Замените на имя листа, который хотите прочитать
+	// rowNumber := 6
 
-    // for {
-    //     cell, err := f.GetCellValue(sheetName, fmt.Sprintf("B%d", rowNumber))
-    //     points, _ := f.GetCellValue(sheetName, fmt.Sprintf("AG%d", rowNumber))
-    //     if err != nil {
-    //         return fmt.Errorf("error getting cell value: %w", err)
-    //     }
+	// for {
+	//     cell, err := f.GetCellValue(sheetName, fmt.Sprintf("B%d", rowNumber))
+	//     points, _ := f.GetCellValue(sheetName, fmt.Sprintf("AG%d", rowNumber))
+	//     if err != nil {
+	//         return fmt.Errorf("error getting cell value: %w", err)
+	//     }
 
-    //     if cell == "" {
-    //         break // Достигнут пустой ряд, можно прервать чтение
-    //     }
+	//     if cell == "" {
+	//         break // Достигнут пустой ряд, можно прервать чтение
+	//     }
 	// 	// Add a candidate
-    //     points1, _ := strconv.Atoi(points)
-    //     candidate := m.Candidate{CandidateID: 0, Name: cell, Group: "ИУ6-32Б", Points: points1}
-    //     err = CreateNewCandidateAI(db, &candidate)
-    //     if err != nil {
-    //         return fmt.Errorf("error creating candidate: %w", err)
-    //     }
-    //     rowNumber++
-    // }
-    return nil
+	//     points1, _ := strconv.Atoi(points)
+	//     candidate := m.Candidate{CandidateID: 0, Name: cell, Group: "ИУ6-32Б", Points: points1}
+	//     err = CreateNewCandidateAI(db, &candidate)
+	//     if err != nil {
+	//         return fmt.Errorf("error creating candidate: %w", err)
+	//     }
+	//     rowNumber++
+	// }
+	return nil
 }
 
 func CreateNewCandidate(db *sql.DB, name string, group string) (m.Candidate, error) {
-    stmt, err := db.Prepare(`INSERT INTO Candidates (Name, GroupName) VALUES (?, ?)`)
-    if err != nil {
-        return m.Candidate{}, fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`INSERT INTO Candidates (Name, GroupName) VALUES (?, ?)`)
+	if err != nil {
+		return m.Candidate{}, fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(name, group)
-    if err != nil {
-        return m.Candidate{}, fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	_, err = stmt.Exec(name, group)
+	if err != nil {
+		return m.Candidate{}, fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    return m.Candidate{CandidateID: 0, Name: name, Group: group, UpVotes: 0, DownVotes: 0}, nil
+	return m.Candidate{CandidateID: 0, Name: name, Group: group, UpVotes: 0, DownVotes: 0}, nil
 }
 
 func CreateNewCandidateAI(db *sql.DB, candidate *m.Candidate) error {
-    stmt, err := db.Prepare(`INSERT INTO Candidates (Name, GroupName, Points, WinCoefficient, LoseCoefficient) VALUES (?, ?, ?, ?, ?)`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
+	stmt, err := db.Prepare(`INSERT INTO Candidates (Name, GroupName, Points, WinCoefficient, LoseCoefficient) VALUES (?, ?, ?, ?, ?)`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
 
-    // Calculate coefficient
-    client := openai.CreateClient("")
+	// Calculate coefficient
+	client := openai.CreateClient("")
 
-    resp, _ := openai.GenerateResponse(client, fmt.Sprintf(`
-    Твоя задача поработать алгоритмом расчета букмекерского коэффициента 
+	resp, _ := openai.GenerateResponse(client, fmt.Sprintf(`
+    Твоя задача поработать алгоритмом расчета букмекерского коэффициента
     основываясь на количество поинтов у студента. Коэффициент того, что студента отчислят
     в конце семестра, зависит от количества поинтов у студента и максимального количества поинтов.
 
@@ -469,163 +469,159 @@ func CreateNewCandidateAI(db *sql.DB, candidate *m.Candidate) error {
     Формат ответа должен быть в любом случае такой как показан дальше и никак иначе: 2.32,3.37
 
     Не забывай, что коэффициент должен быть выгодным букмекерской конторе!
-    `, candidate.Points),"gpt-4o-mini")
+    `, candidate.Points), "gpt-4o-mini")
 
-    w := strings.Split(resp, ",")[0]
-    l := strings.Split(resp, ",")[1]
+	w := strings.Split(resp, ",")[0]
+	l := strings.Split(resp, ",")[1]
 
-    win, _ := strconv.ParseFloat(w, 64)
-    lose, _ := strconv.ParseFloat(l, 64)
+	win, _ := strconv.ParseFloat(w, 64)
+	lose, _ := strconv.ParseFloat(l, 64)
 
-    _, err = stmt.Exec(candidate.Name, candidate.Group, candidate.Points, win, lose)
-    if err != nil {
-        return fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	_, err = stmt.Exec(candidate.Name, candidate.Group, candidate.Points, win, lose)
+	if err != nil {
+		return fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
-
 func GetCandidatesFromGroup(db *sql.DB, group_name string) ([]m.Candidate, error) {
-    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates WHERE Group = ?`)
-    if err != nil {
-        return nil, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates WHERE Group = ?`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    rows, err := stmt.Query(group_name)
-    if err != nil {
-        return nil, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    defer rows.Close()
+	rows, err := stmt.Query(group_name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	defer rows.Close()
 
-    var candidates []m.Candidate
+	var candidates []m.Candidate
 
-    for rows.Next() {
-        var candidate m.Candidate
-        if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes);
-        err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        candidates = append(candidates, candidate)
-    }
+	for rows.Next() {
+		var candidate m.Candidate
+		if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		candidates = append(candidates, candidate)
+	}
 
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("error iterating over rows: %w", err)
-    }
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
 
-    return candidates, nil
+	return candidates, nil
 }
 
 func GetAllCandidates(db *sql.DB) ([]m.Candidate, error) {
-    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates`)
-    if err != nil {
-        return nil, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    rows, err := stmt.Query()
-    if err != nil {
-        return nil, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    defer rows.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	defer rows.Close()
 
-    var candidates []m.Candidate
+	var candidates []m.Candidate
 
-    for rows.Next() {
-        var candidate m.Candidate
-        if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient);
-        err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        candidates = append(candidates, candidate)
-    }
-    if err := rows.Err();
-    err != nil {
-        return nil, fmt.Errorf("error iterating over rows: %w", err)
-    }
+	for rows.Next() {
+		var candidate m.Candidate
+		if err := rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		candidates = append(candidates, candidate)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %w", err)
+	}
 
-    return candidates, nil
+	return candidates, nil
 }
 
 func GetCandidateByName(db *sql.DB, name string) (m.Candidate, error) {
-    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates WHERE Name = ?`)
-    if err != nil {
-        return m.Candidate{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes FROM Candidates WHERE Name = ?`)
+	if err != nil {
+		return m.Candidate{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var candidate m.Candidate
-    err = stmt.QueryRow(name).Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes)
-    if err != nil {
-        return m.Candidate{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var candidate m.Candidate
+	err = stmt.QueryRow(name).Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes)
+	if err != nil {
+		return m.Candidate{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return candidate, nil
+	return candidate, nil
 }
 
 func IncrementUpVotes(db *sql.DB, candidateID int) error {
-    stmt, err := db.Prepare(`UPDATE Candidates SET UpVotes = UpVotes + 1 WHERE CandidateID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Candidates SET UpVotes = UpVotes + 1 WHERE CandidateID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(candidateID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(candidateID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func DecrementUpVotes(db *sql.DB, candidateID int) error {
-    stmt, err := db.Prepare(`UPDATE Candidates SET UpVotes = UpVotes - 1 WHERE CandidateID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Candidates SET UpVotes = UpVotes - 1 WHERE CandidateID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(candidateID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(candidateID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func IncrementDownVotes(db *sql.DB, candidateID int) error {
-    stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes + 1 WHERE CandidateID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes + 1 WHERE CandidateID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(candidateID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(candidateID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func DecrementDownVotes(db *sql.DB, candidateID int) error {
-    stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes - 1 WHERE CandidateID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare update statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`UPDATE Candidates SET DownVotes = DownVotes - 1 WHERE CandidateID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(candidateID)
-    if err != nil {
-        return fmt.Errorf("failed to execute update statement: %w", err)
-    }
+	_, err = stmt.Exec(candidateID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func CreateTableVotes(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Votes (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Votes (
         VoteID INTEGER PRIMARY KEY AUTOINCREMENT,
         UserID INTEGER NOT NULL,
         CandidateID INTEGER NOT NULL,
@@ -635,153 +631,153 @@ func CreateTableVotes(db *sql.DB) error {
         FOREIGN KEY (UserID) REFERENCES Users(UserID),
         FOREIGN KEY (CandidateID) REFERENCES Candidates(CandidateID)
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
 }
 
 func CreateTableWallets(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Wallets (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Wallets (
         WalletID INTEGER PRIMARY KEY AUTOINCREMENT,
         UserID INTEGER NOT NULL,
         Balance INTEGER DEFAULT 0,
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
 }
 
 func CreateWallet(db *sql.DB, userID int) error {
-    stmt, err := db.Prepare(`INSERT INTO Wallets (UserID) VALUES (?)`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`INSERT INTO Wallets (UserID) VALUES (?)`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(userID)
-    if err != nil {
-        return fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	_, err = stmt.Exec(userID)
+	if err != nil {
+		return fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    return nil
+	return nil
 }
 
 func RegisterVote(db *sql.DB, userID int, candidateID int, voteType string, amount int) error {
-    stmt, err := db.Prepare(`INSERT INTO Votes (UserID, CandidateID, VoteType, Amount) VALUES (?, ?, ?, ?)`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`INSERT INTO Votes (UserID, CandidateID, VoteType, Amount) VALUES (?, ?, ?, ?)`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer stmt.Close()
 
-    _, err = stmt.Exec(userID, candidateID, voteType, amount)
-    if err != nil {
-        return fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	_, err = stmt.Exec(userID, candidateID, voteType, amount)
+	if err != nil {
+		return fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    if voteType == "win" {
-        IncrementUpVotes(db, candidateID)
-    } else if voteType == "lose" {
-        IncrementDownVotes(db, candidateID)
-    }
+	if voteType == "win" {
+		IncrementUpVotes(db, candidateID)
+	} else if voteType == "lose" {
+		IncrementDownVotes(db, candidateID)
+	}
 
-    return nil
+	return nil
 }
 
 func GetVoteByUserAndCandidate(db *sql.DB, userID int, candidateID int) (m.Vote, error) {
-    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType, Amount FROM Votes WHERE UserID = ? AND CandidateID = ?`)
-    if err != nil {
-        fmt.Println(err)
-        return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType, Amount FROM Votes WHERE UserID = ? AND CandidateID = ?`)
+	if err != nil {
+		fmt.Println(err)
+		return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var vote m.Vote
-    err = stmt.QueryRow(userID, candidateID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType, &vote.Amount)
-    if err != nil {
-        fmt.Println(err)
-        return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var vote m.Vote
+	err = stmt.QueryRow(userID, candidateID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType, &vote.Amount)
+	if err != nil {
+		fmt.Println(err)
+		return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return vote, nil
+	return vote, nil
 }
 
 func GetVoteById(db *sql.DB, voteID int) (m.Vote, error) {
-    stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType FROM Votes WHERE VoteID = ?`)
-    if err != nil {
-        return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT VoteID, UserID, CandidateID, VoteType FROM Votes WHERE VoteID = ?`)
+	if err != nil {
+		return m.Vote{}, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var vote m.Vote
-    err = stmt.QueryRow(voteID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType)
-    if err != nil {
-        return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var vote m.Vote
+	err = stmt.QueryRow(voteID).Scan(&vote.VoteID, &vote.UserID, &vote.CandidateID, &vote.VoteType)
+	if err != nil {
+		return m.Vote{}, fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return vote, nil
+	return vote, nil
 }
 
 func ClearVote(db *sql.DB, voteID int) error {
-    // Decrement the upvote count for the candidate associated with the vote
-    vote, err := GetVoteById(db, voteID)
-    if err != nil {
-        return fmt.Errorf("failed to get vote: %w", err)
-    }
-    
-    if vote.VoteType == "win" {
-        DecrementUpVotes(db, vote.CandidateID)
-    } else if vote.VoteType == "lose" {
-        DecrementDownVotes(db, vote.CandidateID)
-    }
+	// Decrement the upvote count for the candidate associated with the vote
+	vote, err := GetVoteById(db, voteID)
+	if err != nil {
+		return fmt.Errorf("failed to get vote: %w", err)
+	}
 
-    // Delete the vote from the database
-    fmt.Println("Deleting vote with ID:", voteID)
-    stmt, err := db.Prepare(`DELETE FROM Votes WHERE VoteID = ?`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare delete statement: %w", err)
-    }
-    defer stmt.Close()
+	if vote.VoteType == "win" {
+		DecrementUpVotes(db, vote.CandidateID)
+	} else if vote.VoteType == "lose" {
+		DecrementDownVotes(db, vote.CandidateID)
+	}
 
-    _, err = stmt.Exec(voteID)
-    if err != nil {
-        return fmt.Errorf("failed to execute delete statement: %w", err)
-    }
+	// Delete the vote from the database
+	fmt.Println("Deleting vote with ID:", voteID)
+	stmt, err := db.Prepare(`DELETE FROM Votes WHERE VoteID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare delete statement: %w", err)
+	}
+	defer stmt.Close()
 
-    return nil
+	_, err = stmt.Exec(voteID)
+	if err != nil {
+		return fmt.Errorf("failed to execute delete statement: %w", err)
+	}
+
+	return nil
 }
 
 func GetVotesByCandidate(db *sql.DB, candidateID int) (int, int) {
-    stmt, err := db.Prepare(`SELECT UpVotes, DownVotes FROM Candidates WHERE CandidateID = ?`)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT UpVotes, DownVotes FROM Candidates WHERE CandidateID = ?`)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
 
-    var upVotes int
-    var downVotes int
-    err = stmt.QueryRow(candidateID).Scan(&upVotes, &downVotes)
-    if err != nil {
-        log.Fatal(err)
-    }
+	var upVotes int
+	var downVotes int
+	err = stmt.QueryRow(candidateID).Scan(&upVotes, &downVotes)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    return upVotes, downVotes
+	return upVotes, downVotes
 }
 
 //Vk part
 
 func CreateVkTable(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS VkUsers (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS VkUsers (
         UserID INTEGER NOT NULL,
         BDate VARCHAR(255),
         Photo200Orig VARCHAR(255),
@@ -803,18 +799,18 @@ func CreateVkTable(db *sql.DB) error {
         IsClosed BOOLEAN,
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
 }
 
 func CreateVkUser(db *sql.DB, info m.VkUserInfo) (m.VkUserInfo, error) {
-    stmt, err := db.Prepare(`INSERT INTO VkUsers (
+	stmt, err := db.Prepare(`INSERT INTO VkUsers (
         UserID,
         BDate,
         Photo200Orig,
@@ -835,57 +831,57 @@ func CreateVkUser(db *sql.DB, info m.VkUserInfo) (m.VkUserInfo, error) {
         CanAccessClosed,
         IsClosed
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    if err != nil {
-        return m.VkUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
-    _, err = stmt.Exec(
-        info.ID,
-        info.BDate,
-        info.Photo200Orig,
-        info.Interests,
-        info.About,
-        info.Activities,
-        info.University,
-        info.UniversityName,
-        info.Faculty,
-        info.FacultyName,
-        info.Graduation,
-        info.HomeTown,
-        info.InspiredBy,
-        info.Schools,
-        info.Sex,
-        info.FirstName,
-        info.LastName,
-        info.CanAccessClosed,
-        info.IsClosed,
-    )
-    if err != nil {
-        return m.VkUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	if err != nil {
+		return m.VkUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	_, err = stmt.Exec(
+		info.ID,
+		info.BDate,
+		info.Photo200Orig,
+		info.Interests,
+		info.About,
+		info.Activities,
+		info.University,
+		info.UniversityName,
+		info.Faculty,
+		info.FacultyName,
+		info.Graduation,
+		info.HomeTown,
+		info.InspiredBy,
+		info.Schools,
+		info.Sex,
+		info.FirstName,
+		info.LastName,
+		info.CanAccessClosed,
+		info.IsClosed,
+	)
+	if err != nil {
+		return m.VkUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    return info, nil
+	return info, nil
 }
 
 func GetAvatarURLByUsername(db *sql.DB, username string) (string, error) {
-    stmt, err := db.Prepare(`SELECT Photo200Orig FROM VkUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
-    if err != nil {
-        return "", fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT Photo200Orig FROM VkUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
+	if err != nil {
+		return "", fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var avatarURL string
-    err = stmt.QueryRow(username).Scan(&avatarURL)
-    if err != nil {
-        return "", fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var avatarURL string
+	err = stmt.QueryRow(username).Scan(&avatarURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return avatarURL, nil
+	return avatarURL, nil
 }
 
 // Yandex part
 
 func CreateYandexTable(db *sql.DB) error {
-    stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS YandexUsers (
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS YandexUsers (
         UserID INTEGER NOT NULL,
         YandexID INTEGER NOT NULL,
         DisplayName VARCHAR(255),
@@ -898,18 +894,18 @@ func CreateYandexTable(db *sql.DB) error {
         Number VARCHAR(255),
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
     )`)
-    if err != nil {
-        return fmt.Errorf("failed to prepare create table statement: %w", err)
-    }
-    _, err = stmt.Exec()
-    if err != nil {
-        return fmt.Errorf("failed to execute create table statement: %w", err)
-    }
-    return nil
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
 }
 
 func CreateYandexUser(db *sql.DB, info m.YandexUserInfo) (m.YandexUserInfo, error) {
-    stmt, err := db.Prepare(`INSERT INTO YandexUsers (
+	stmt, err := db.Prepare(`INSERT INTO YandexUsers (
         UserID,
         YandexID,
         DisplayName,
@@ -921,71 +917,152 @@ func CreateYandexUser(db *sql.DB, info m.YandexUserInfo) (m.YandexUserInfo, erro
         DefaultAvatarID,
         Number
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    if err != nil {
-        return m.YandexUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
-    }
-    _, err = stmt.Exec(
-        info.ID,
-        info.YandexID,
-        info.DisplayName,
-        info.RealName,
-        info.FirstName,
-        info.LastName,
-        info.DefaultEmail,
-        info.Birthday,
-        info.DefaultAvatarID,
-        info.Number,
-    )
-    if err != nil {
-        return m.YandexUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
-    }
+	if err != nil {
+		return m.YandexUserInfo{}, fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	_, err = stmt.Exec(
+		info.ID,
+		info.YandexID,
+		info.DisplayName,
+		info.RealName,
+		info.FirstName,
+		info.LastName,
+		info.DefaultEmail,
+		info.Birthday,
+		info.DefaultAvatarID,
+		info.Number,
+	)
+	if err != nil {
+		return m.YandexUserInfo{}, fmt.Errorf("failed to execute insert statement: %w", err)
+	}
 
-    return info, nil
+	return info, nil
 }
 
 func GetYandexAvatarURLByUsername(db *sql.DB, username string) (string, error) {
-    stmt, err := db.Prepare(`SELECT DefaultAvatarID FROM YandexUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
-    if err != nil {
-        return "", fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT DefaultAvatarID FROM YandexUsers WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
+	if err != nil {
+		return "", fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    var avatarURL string
-    err = stmt.QueryRow(username).Scan(&avatarURL)
-    if err != nil {
-        return "", fmt.Errorf("failed to execute select statement: %w", err)
-    }
+	var avatarURL string
+	err = stmt.QueryRow(username).Scan(&avatarURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute select statement: %w", err)
+	}
 
-    return avatarURL, nil
+	return avatarURL, nil
 }
 
 // Search
 
 func SearchCandidates(db *sql.DB, query string) ([]m.Candidate, error) {
-    stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates WHERE Name LIKE ?`)
-    if err != nil {
-        return nil, fmt.Errorf("failed to prepare select statement: %w", err)
-    }
-    defer stmt.Close()
+	stmt, err := db.Prepare(`SELECT CandidateID, Name, GroupName, UpVotes, DownVotes, Points, WinCoefficient, LoseCoefficient FROM Candidates WHERE Name LIKE ?`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
 
-    rows, err := stmt.Query(query+"%")
-    if err != nil {
-        return nil, fmt.Errorf("failed to execute select statement: %w", err)
-    }
-    defer rows.Close()
+	rows, err := stmt.Query(query + "%")
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute select statement: %w", err)
+	}
+	defer rows.Close()
 
-    var candidates []m.Candidate
-    for rows.Next() {
-        var candidate m.Candidate
-        err = rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient)
-        if err != nil {
-            return nil, fmt.Errorf("failed to scan row: %w", err)
-        }
-        candidates = append(candidates, candidate)
-    }
-    if err = rows.Err(); err != nil {
-        return nil, fmt.Errorf("failed to iterate over rows: %w", err)
-    }
+	var candidates []m.Candidate
+	for rows.Next() {
+		var candidate m.Candidate
+		err = rows.Scan(&candidate.CandidateID, &candidate.Name, &candidate.Group, &candidate.UpVotes, &candidate.DownVotes, &candidate.Points, &candidate.WinCoefficient, &candidate.LoseCoefficient)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		candidates = append(candidates, candidate)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to iterate over rows: %w", err)
+	}
 
-    return candidates, nil
+	return candidates, nil
+}
+
+// Avatars
+
+func CreateAvatarTable(db *sql.DB) error {
+	stmt, err := db.Prepare(`CREATE TABLE IF NOT EXISTS Avatars (
+        AvatarID INTEGER PRIMARY KEY AUTOINCREMENT,
+        UserID INTEGER NOT NULL,
+        AvatarURL VARCHAR(255),
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    )`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare create table statement: %w", err)
+	}
+	_, err = stmt.Exec()
+	if err != nil {
+		return fmt.Errorf("failed to execute create table statement: %w", err)
+	}
+	return nil
+}
+
+func GetAvatarByUserID(db *sql.DB, userID int) (string, error) {
+	stmt, err := db.Prepare(`SELECT AvatarURL FROM Avatars WHERE UserID = ?`)
+	if err != nil {
+		return "", fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
+
+	var avatarURL string
+	err = stmt.QueryRow(userID).Scan(&avatarURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute select statement: %w", err)
+	}
+
+	return avatarURL, nil
+}
+
+func GetAvatarByUsername(db *sql.DB, username string) (string, error) {
+	stmt, err := db.Prepare(`SELECT AvatarURL FROM Avatars WHERE UserID = (SELECT UserID FROM Users WHERE Username = ?)`)
+	if err != nil {
+		return "", fmt.Errorf("failed to prepare select statement: %w", err)
+	}
+	defer stmt.Close()
+
+	var avatarURL string
+	err = stmt.QueryRow(username).Scan(&avatarURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute select statement: %w", err)
+	}
+
+	return avatarURL, nil
+}
+
+func CreateAvatar(db *sql.DB, userID int, avatarURL string) error {
+	stmt, err := db.Prepare(`INSERT INTO Avatars (UserID, AvatarURL) VALUES (?, ?)`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare insert statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID, avatarURL)
+	if err != nil {
+		return fmt.Errorf("failed to execute insert statement: %w", err)
+	}
+
+	return nil
+}
+
+func UpdateAvatar(db *sql.DB, userID int, avatarURL string) error {
+	stmt, err := db.Prepare(`UPDATE Avatars SET AvatarURL = ? WHERE UserID = ?`)
+	if err != nil {
+		return fmt.Errorf("failed to prepare update statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(avatarURL, userID)
+	if err != nil {
+		return fmt.Errorf("failed to execute update statement: %w", err)
+	}
+
+	return nil
 }

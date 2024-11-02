@@ -1,15 +1,16 @@
 package controllers
 
 import (
+	"database/sql"
+	"dbgolang/database"
 	"dbgolang/models"
-	"net/http"
 	"fmt"
 	"log"
-	"github.com/gin-gonic/gin"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
-	"dbgolang/database"
+	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func ArticlesIndex(c *gin.Context) {
@@ -20,7 +21,7 @@ func ArticlesIndex(c *gin.Context) {
 	}
 
 	dbPath := "./db.db"
-    db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,15 +37,15 @@ func ArticlesIndex(c *gin.Context) {
 		articles = append(articles, articles2...)
 	}
 
-	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
+	avatar_url, _ := database.GetAvatarByUsername(db, username)
 
 	c.HTML(
 		http.StatusOK,
 		"articles/index.html",
 		gin.H{
 			"avatar_url": avatar_url,
-			"articles": articles,
-			"username": username,
+			"articles":   articles,
+			"username":   username,
 		},
 	)
 }
@@ -60,7 +61,7 @@ func ArticlesCreate(c *gin.Context) {
 	fmt.Println("Title: ", data.Title)
 	// * Insert article
 	dbPath := "./db.db"
-    db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,10 +82,10 @@ func ArticlesCreate(c *gin.Context) {
 
 	c.HTML(http.StatusOK,
 		"articles/article.html",
-		gin.H {
-			"Title": data.Title,
-			"Content": data.Content,
-			"Author": username,
+		gin.H{
+			"Title":     data.Title,
+			"Content":   data.Content,
+			"Author":    username,
 			"ArticleID": article.ArticleID,
 		})
 }
@@ -109,7 +110,7 @@ func ArticleDelete(c *gin.Context) {
 	}
 	// Close database
 	defer db.Close()
-	
+
 	// Redirect to articles index
 	c.Redirect(302, "/articles")
 }
@@ -136,9 +137,9 @@ func ArticleUpdate(c *gin.Context) {
 	// Redirect to articles index
 	c.HTML(http.StatusOK,
 		"articles/update.html",
-		gin.H {
-			"Title": article.Title,
-			"Content": article.Content,
+		gin.H{
+			"Title":     article.Title,
+			"Content":   article.Content,
 			"ArticleID": article.ArticleID,
 		})
 }
@@ -153,7 +154,7 @@ func ArticleUpdatePost(c *gin.Context) {
 	if c.Request.Method != "POST" {
 		c.Redirect(302, "/")
 	}
-	_, err := c.Cookie("username") 
+	_, err := c.Cookie("username")
 	if err != nil {
 		c.Redirect(302, "/")
 	}
@@ -184,36 +185,36 @@ func ArticleUpdatePost(c *gin.Context) {
 }
 
 func ArticleShow(c *gin.Context) {
-    id, err := strconv.Atoi(c.Param("id"))
-    if err != nil {
-        c.Redirect(500, "/")
-    }
-    // Get article from database
-    dbPath := "./db.db"
-    db, err := sql.Open("sqlite3", dbPath)
-    if err != nil {
-        c.Redirect(500, "/")
-    }
-    article, err := database.GetArticleByID(db, id)
-    // Delete article from database
-    if err != nil {
-        c.Redirect(500, "/")
-    }
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.Redirect(500, "/")
+	}
+	// Get article from database
+	dbPath := "./db.db"
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		c.Redirect(500, "/")
+	}
+	article, err := database.GetArticleByID(db, id)
+	// Delete article from database
+	if err != nil {
+		c.Redirect(500, "/")
+	}
 	//Get username
 	username, err := c.Cookie("username")
 	if err != nil {
 		c.Redirect(500, "/")
 		return
 	}
-	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
-    // Close database
-    defer db.Close()
-    c.HTML(200, "articles/article_show.html", gin.H{
-		"ArticleID": article.ArticleID,
-        "Title":   article.Title,
-        "Content": article.Content,
-        "Author":  article.Author,
-		"username": username,
+	avatar_url, _ := database.GetAvatarByUsername(db, username)
+	// Close database
+	defer db.Close()
+	c.HTML(200, "articles/article_show.html", gin.H{
+		"ArticleID":  article.ArticleID,
+		"Title":      article.Title,
+		"Content":    article.Content,
+		"Author":     article.Author,
+		"username":   username,
 		"avatar_url": avatar_url,
-    })
+	})
 }

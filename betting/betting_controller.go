@@ -3,12 +3,12 @@ package betting
 import (
 	"database/sql"
 	"dbgolang/database"
+	m "dbgolang/models"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
-	m "dbgolang/models"
-	"math/rand"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -93,7 +93,7 @@ func BettingIndex(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
+	avatar_url, _ := database.GetAvatarByUsername(db, username)
 
 	c.HTML(http.StatusOK, "articles/betting.html", gin.H{
 		"avatar_url": avatar_url,
@@ -140,7 +140,7 @@ func BettingPost(c *gin.Context) {
 		c.Redirect(302, "/betting")
 		return
 	}
-	
+
 	c.HTML(http.StatusOK, "articles/candidate.html", gin.H{
 		"CandidateID": candidate.CandidateID,
 		"Name": candidate.Name,
@@ -162,7 +162,7 @@ func VoteWin(c *gin.Context) {
 	}
 	value := data.Amount
 	fmt.Println("value: ", value)
-	
+
 	dbPath := "./db.db"
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -385,7 +385,7 @@ func Results(c *gin.Context) {
 	})
 }
 
-// Searching 
+// Searching
 
 func Search(c *gin.Context) {
 	username, err := c.Cookie("username")
@@ -411,7 +411,7 @@ func Search(c *gin.Context) {
 		log.Fatal(err)
 	}
 
-	avatar_url, _ := database.GetAvatarURLByUsername(db, username)
+	avatar_url, _ := database.GetAvatarByUsername(db, username)
 	c.HTML(http.StatusOK, "articles/search.html", gin.H{
 		"candidates": candidates,
 		"avatar_url": avatar_url,

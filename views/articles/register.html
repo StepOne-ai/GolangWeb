@@ -1,154 +1,219 @@
 {{ define "articles/register.html" }}
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <title>Register Page</title>
-</head>
-<style>
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f5f5f5;
-}
-.login-form {
-  display: flex;
-  width: 300px;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <script
+            src="https://unpkg.com/htmx.org@1.9.10"
+            integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+            crossorigin="anonymous"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        />
+        <title>Register Page</title>
+    </head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+        .login-form {
+            display: flex;
+            width: 300px;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-.input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
 
-.input-group label {
-  margin-bottom: 10px;
-}
+        .input-group label {
+            margin-bottom: 10px;
+        }
 
-.input-group input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
+        .input-group input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-button[type="submit"] {
-  background-color: #4CAF50;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+        button[type="submit"] {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-button[type="submit"]:hover {
-  background-color: #3e8e41;
-}
+        button[type="submit"]:hover {
+            background-color: #3e8e41;
+        }
 
-.vk-button {
-  height: 40px;
-  border-width: 0;
-  border-radius: 5px;
-  white-space: nowrap;
-  box-shadow: 0px 0px 5px rgba(0,0,0,.08);
-  transition-property: background-color, box-shadow;
-  transition-duration: 150ms;
-  transition-timing-function: ease-in-out;
-  padding: 0;
-  font-family: sans-serif;
-  outline: none;
-  background-color: #5181B8;
-  color: #fff;
-  cursor: pointer;
-  &:focus,
-  &:hover {
-    box-shadow: 1px 4px 5px 1px rgba(0,0,0,0.1);
-  }
-  
-  &:active {
-    background-color: #e5e5e5;
-    box-shadow: none;
-    transition-duration: 10ms;
-  }
-}
-    
-.vk-button__icon {
-  display: inline-block;
-  vertical-align: middle;
-  margin: 8px 0 8px 8px;
-  width: 28px;
-  height: 26px;
-  box-sizing: border-box;
-  background-image: url('https://vk.com/images/svg_icons/logo.svg');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
+        .vk-button {
+            height: 40px;
+            border-width: 0;
+            border-radius: 5px;
+            white-space: nowrap;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.08);
+            transition-property: background-color, box-shadow;
+            transition-duration: 150ms;
+            transition-timing-function: ease-in-out;
+            padding: 0;
+            font-family: sans-serif;
+            outline: none;
+            background-color: #5181b8;
+            color: #fff;
+            cursor: pointer;
+            &:focus,
+            &:hover {
+                box-shadow: 1px 4px 5px 1px rgba(0, 0, 0, 0.1);
+            }
 
-.vk__icon--plus {
-  width: 27px;
-}
+            &:active {
+                background-color: #e5e5e5;
+                box-shadow: none;
+                transition-duration: 10ms;
+            }
+        }
 
-.vk-button__text {
-  display: inline-block;
-  vertical-align: middle;
-  padding: 0 24px;
-  font-size: 14px;
-  font-weight: bold;
-  font-family: 'Roboto', arial, sans-serif;
-}
+        .vk-button__icon {
+            display: inline-block;
+            vertical-align: middle;
+            margin: 8px 0 8px 8px;
+            width: 28px;
+            height: 26px;
+            box-sizing: border-box;
+            background-image: url("https://vk.com/images/svg_icons/logo.svg");
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
+        .vk__icon--plus {
+            width: 27px;
+        }
 
+        .vk-button__text {
+            display: inline-block;
+            vertical-align: middle;
+            padding: 0 24px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: "Roboto", arial, sans-serif;
+        }
 
+        .yandex-btn {
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .yandex-btn i {
+            margin-right: 10px;
+        }
 
+        /* Custom styles */
 
-/* Custom styles */
-
-
-/* hover animation */
-.vk-button:hover {
-  animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-}
-</style>
-<body>
-    <form class="login-form"
-        action="/register/new" 
-        method="POST">
-        <h2>Register</h2>
-        <div class="input-group">
-          <input type="email" id="email" name="email" placeholder="myemail@gmail.com" required>
-        </div>
-        <div class="input-group">
-            <input type="text" id="username" name="username" placeholder="Username" required>
-        </div>
-        <div class="input-group">
-            <input type="password" id="password" name="password" placeholder="********" required>
-          </div>
-        <button type="submit" style="margin-bottom: 5px; width: 193px;">Create</button>
-        <button type="button" class="vk-button">
-          <a href="/register/vk" style="text-decoration: none; color: white; margin-bottom: 10px;">
-          <span class="vk-button__icon">
-          </span>
-          <span class="vk-button__text">Войти через ВК</span>
-        </a>
-        </button>
-        <span><a href="/login" style="margin-top: 10px;outline: none; text-decoration: none">Already have an account?</a></span>
-      </form>
-</body>
+        /* hover animation */
+        .vk-button:hover {
+            animation: shake 0.82s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+            transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+    </style>
+    <body>
+        <form class="login-form" action="/register/new" method="POST">
+            <h2>Register</h2>
+            <div class="input-group">
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="myemail@gmail.com"
+                    required
+                />
+            </div>
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Username"
+                    required
+                />
+            </div>
+            <div class="input-group">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="********"
+                    required
+                />
+            </div>
+            <button type="submit" style="margin-bottom: 5px; width: 193px">
+                Create
+            </button>
+            <button type="button" class="vk-button">
+                <a
+                    href="/register/vk"
+                    style="
+                        text-decoration: none;
+                        color: white;
+                        margin-bottom: 10px;
+                    "
+                >
+                    <span class="vk-button__icon"> </span>
+                    <span class="vk-button__text">Войти через ВК</span>
+                </a>
+            </button>
+            <a
+                href="/login/yandex"
+                style="
+                    text-decoration: none;
+                    color: white;
+                    margin-bottom: 10px;
+                    margin-top: 5px;
+                "
+            >
+                <span class="yandex-btn">
+                    <i class="fab fa-yandex"></i> Войти с Yandex ID
+                </span>
+            </a>
+            <span
+                ><a
+                    href="/login"
+                    style="
+                        margin-top: 10px;
+                        outline: none;
+                        text-decoration: none;
+                    "
+                    >Already have an account?</a
+                ></span
+            >
+        </form>
+    </body>
 </html>
 {{ end }}
