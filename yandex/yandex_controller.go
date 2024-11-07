@@ -17,8 +17,8 @@ import (
 )
 
 const (
-	clientID     = "05cfb5d9fc7e480c9cd278a8f1fbf5e8"
-	clientSecret = "905bdc0de6d04031b0b309c3344c86ef"
+	clientID     = ""
+	clientSecret = ""
 	redirectURI  = "http://localhost/callback_yandex"
 	authURL      = "https://oauth.yandex.com/authorize"
 	tokenURL     = "https://oauth.yandex.ru/token"
