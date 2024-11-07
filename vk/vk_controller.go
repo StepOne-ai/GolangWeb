@@ -18,8 +18,8 @@ import (
 )
 
 const (
-	vkClientID     = "52467139"
-	vkClientSecret = "75272fe575272fe575272fe55d7607ba267752775272fe5122d60bf2260bbcefc4e0f43"
+	vkClientID     = ""
+	vkClientSecret = ""
 	vkRedirectURI  = "http://localhost/callback"
 )
 
